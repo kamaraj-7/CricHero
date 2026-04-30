@@ -3,33 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CricketPro Firebase - Live Match Scorer</title>
+    <title>CricheroesV3 - Super Kings Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
     <style>
         :root {
-            --primary: #1f77d2;
-            --secondary: #ff6b35;
-            --success: #2ecc71;
-            --danger: #ff4d4d;
-            --warning: #ffc107;
-            --dark: #1a1a1a;
-            --light: #f0f2f5;
+            --csk-yellow: #FDB913;
+            --csk-blue: #005DAA;
+            --csk-dark-blue: #00427A;
+            --bg-color: #f0f2f5;
+            --text-color: #1a1a1a;
             --white: #ffffff;
+            --error: #ff4d4d;
+            --success: #2ecc71;
             --shadow: 0 10px 30px rgba(0,0,0,0.1);
-            --shadow-sm: 0 4px 12px rgba(0,0,0,0.08);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Roboto', sans-serif; background: var(--light); color: var(--dark); min-height: 100vh; }
-        h1, h2, h3, .logo { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        h1, h2, h3, .logo-text { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
 
-        /* ============ NAVBAR ============ */
+        body { background-color: var(--bg-color); color: var(--text-color); min-height: 100vh; }
+
+        /* --- AUTH SECTION --- */
+        .auth-wrapper {
+            background: linear-gradient(135deg, var(--csk-yellow) 0%, var(--csk-blue) 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            border-top: 10px solid var(--csk-yellow);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .logo-text { font-size: 36px; color: var(--csk-blue); margin-bottom: 10px; letter-spacing: 2px; }
+        .logo-text span { color: var(--csk-yellow); }
+
+        .form-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; margin-bottom: 8px; font-weight: 700; color: var(--csk-blue); font-size: 14px; }
+        input, select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        input:focus, select:focus { border-color: var(--csk-yellow); outline: none; box-shadow: 0 0 0 4px rgba(253, 185, 19, 0.1); }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-transform: uppercase;
+        }
+
+        .btn-primary { background: var(--csk-yellow); color: var(--csk-blue); }
+        .btn-primary:hover { background: var(--csk-blue); color: var(--csk-yellow); transform: translateY(-2px); }
+
+        .google-btn {
+            background: white;
+            color: #444;
+            border: 2px solid #e1e8ed;
+            margin-top: 20px;
+        }
+        .google-btn:hover { background: #f8f9fa; border-color: #ccd6dd; }
+
+        /* --- APP SECTION --- */
         .navbar {
-            background: linear-gradient(135deg, var(--primary) 0%, #1a5fa0 100%);
+            background: var(--csk-blue);
             padding: 0 5%;
             height: 80px;
             display: flex;
@@ -39,856 +102,388 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            box-shadow: var(--shadow);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
 
-        .logo { font-size: 28px; color: var(--secondary); letter-spacing: 2px; }
-        .nav-right { display: flex; gap: 20px; align-items: center; }
-        .live-indicator { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
-        .live-dot { width: 10px; height: 10px; background: var(--danger); border-radius: 50%; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-
-        .sync-status {
+        .nav-links { display: flex; list-style: none; height: 100%; }
+        .nav-links li { height: 100%; }
+        .nav-links a { 
+            color: white; 
+            text-decoration: none; 
+            font-weight: 600; 
+            cursor: pointer; 
+            padding: 0 20px;
+            height: 100%;
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            padding: 8px 12px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 20px;
+            transition: 0.3s;
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 1px;
         }
+        .nav-links a:hover, .nav-links a.active { background: var(--csk-yellow); color: var(--csk-blue); }
 
-        .sync-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--success);
-            border-radius: 50%;
-            animation: blink 1s infinite;
-        }
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
 
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-
-        /* ============ CONTAINER ============ */
-        .container { max-width: 1400px; margin: 40px auto; padding: 0 20px; }
-
-        /* ============ MATCH HEADER ============ */
-        .match-header {
-            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
-            color: white;
-            padding: 40px;
-            border-radius: 20px;
-            margin-bottom: 30px;
-            box-shadow: var(--shadow);
-        }
-
-        .match-title { font-size: 24px; margin-bottom: 20px; text-align: center; }
-        .match-status { font-size: 14px; opacity: 0.9; text-align: center; margin-bottom: 20px; }
-
-        .teams-score {
+        .stats-grid {
             display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            gap: 30px;
-            align-items: center;
-            text-align: center;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
         }
 
-        .team-card {
-            background: rgba(255,255,255,0.1);
-            padding: 20px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-        }
-
-        .team-name { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
-        .team-score { font-size: 48px; font-weight: 700; margin-bottom: 8px; }
-        .team-overs { font-size: 14px; opacity: 0.9; }
-
-        .vs-divider { font-size: 32px; font-weight: 700; opacity: 0.7; }
-
-        /* ============ MAIN GRID ============ */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        /* ============ SCORING PANEL ============ */
-        .scoring-panel {
+        .stat-card {
             background: white;
             padding: 30px;
             border-radius: 20px;
             box-shadow: var(--shadow);
-        }
-
-        .panel-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 25px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            color: var(--primary);
+            gap: 20px;
+            border-bottom: 6px solid var(--csk-yellow);
         }
 
-        .scoring-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .input-group label {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .input-group input, .input-group select {
-            padding: 12px;
-            border: 2px solid #e1e8ed;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .input-group input:focus, .input-group select:focus {
-            border-color: var(--primary);
-            outline: none;
-            box-shadow: 0 0 0 4px rgba(31, 119, 210, 0.1);
-        }
-
-        /* ============ QUICK BUTTONS ============ */
-        .quick-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-
-        .quick-btn {
-            padding: 12px;
-            border: 2px solid var(--primary);
-            background: white;
-            color: var(--primary);
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
-        }
-
-        .quick-btn:hover {
-            background: var(--primary);
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        /* ============ ACTION BUTTONS ============ */
-        .action-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 12px;
-        }
-
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
+        .stat-icon-circle {
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 93, 170, 0.1);
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            font-size: 14px;
-            text-transform: uppercase;
+            font-size: 24px;
+            color: var(--csk-blue);
         }
 
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
+        .stat-info h3 { font-size: 32px; color: var(--csk-blue); line-height: 1; }
+        .stat-info p { color: #666; font-weight: 600; font-size: 14px; }
 
-        .btn-primary:hover {
-            background: #1a5fa0;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #27ae60;
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #cc0000;
-            transform: translateY(-2px);
-        }
-
-        .btn-warning {
-            background: var(--warning);
-            color: var(--dark);
-        }
-
-        .btn-warning:hover {
-            background: #e0a800;
-            transform: translateY(-2px);
-        }
-
-        /* ============ STATS DISPLAY ============ */
-        .stats-display {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 12px;
-        }
-
-        .stat-box {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            border-left: 4px solid var(--primary);
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: #666;
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        /* ============ SIDEBAR ============ */
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .sidebar-card {
+        .section-card {
             background: white;
-            padding: 20px;
-            border-radius: 15px;
+            padding: 30px;
+            border-radius: 20px;
             box-shadow: var(--shadow);
+            margin-bottom: 30px;
         }
 
-        .sidebar-title {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 15px;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .player-input {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .player-input input {
-            flex: 1;
-            padding: 10px;
-            border: 2px solid #e1e8ed;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .player-input button {
-            padding: 10px 15px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 700;
-            transition: all 0.3s;
-        }
-
-        .player-input button:hover {
-            background: #1a5fa0;
-        }
-
-        .player-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .player-item {
-            background: #f8f9fa;
-            padding: 10px 12px;
-            border-radius: 6px;
+        .header-flex {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 14px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
-        .player-item button {
-            background: var(--danger);
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.3s;
-        }
+        .table-wrapper { overflow-x: auto; border-radius: 12px; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th { background: #f8f9fa; color: var(--csk-blue); padding: 18px; text-align: left; font-weight: 700; border-bottom: 2px solid #eee; }
+        td { padding: 18px; border-bottom: 1px solid #eee; font-size: 15px; }
+        tr:last-child td { border-bottom: none; }
 
-        .player-item button:hover {
-            background: #cc0000;
-        }
-
-        /* ============ BALL BY BALL ============ */
-        .ball-by-ball {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            margin-bottom: 30px;
-        }
-
-        .ball-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-            gap: 8px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .ball {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .action-btn {
+            padding: 8px;
             border-radius: 8px;
-            font-weight: 700;
-            font-size: 14px;
+            border: none;
             cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid #e1e8ed;
+            transition: 0.2s;
+            margin-right: 5px;
+            color: white;
         }
+        .btn-delete { background: #ff4d4d; }
+        .btn-delete:hover { background: #cc0000; }
 
-        .ball.run-0 { background: #f8f9fa; color: var(--dark); }
-        .ball.run-1 { background: #e3f2fd; color: var(--primary); }
-        .ball.run-2 { background: #c8e6c9; color: var(--success); }
-        .ball.run-3 { background: #ffe0b2; color: #f57c00; }
-        .ball.run-4 { background: #ffccbc; color: #d84315; }
-        .ball.run-6 { background: #f3e5f5; color: #7b1fa2; }
-        .ball.wicket { background: #ffcdd2; color: var(--danger); }
-        .ball.wide { background: #fff9c4; color: #f57f17; }
-        .ball.no-ball { background: #f1f8e9; color: #558b2f; }
-
-        .ball:hover {
-            transform: scale(1.1);
-            box-shadow: var(--shadow-sm);
-        }
-
-        /* ============ LIVE UPDATES ============ */
-        .live-updates {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            margin-bottom: 30px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .update-item {
-            padding: 12px;
-            border-left: 4px solid var(--primary);
-            background: #f8f9fa;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            font-size: 14px;
-            animation: slideInLeft 0.3s ease-out;
-        }
-
-        @keyframes slideInLeft {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .update-time {
-            font-size: 12px;
-            color: #999;
-            margin-top: 4px;
-        }
-
-        /* ============ MODAL ============ */
+        /* --- MODALS --- */
         .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.7);
             backdrop-filter: blur(8px);
             z-index: 2000;
             justify-content: center;
             align-items: center;
             padding: 20px;
-            overflow-y: auto;
         }
-
-        .modal.active { display: flex; }
-
         .modal-content {
             background: white;
             padding: 40px;
-            border-radius: 20px;
+            border-radius: 24px;
             width: 100%;
-            max-width: 500px;
+            max-width: 550px;
             position: relative;
-            animation: slideUp 0.3s ease-out;
+            animation: zoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .close-btn { position: absolute; top: 25px; right: 25px; font-size: 24px; cursor: pointer; color: #999; transition: 0.2s; }
+        .close-btn:hover { color: var(--csk-blue); }
+
+        /* --- UTILS --- */
+        .hidden { display: none !important; }
+        .toast {
+            position: fixed; bottom: 30px; right: 30px;
+            padding: 16px 32px; border-radius: 12px;
+            color: white; font-weight: 700; z-index: 3000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: slideIn 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        .empty-state { text-align: center; padding: 40px; color: #999; }
+        .empty-state i { font-size: 48px; margin-bottom: 15px; display: block; }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 992px) {
+            .navbar { height: auto; padding: 15px 5%; flex-direction: column; gap: 15px; }
+            .nav-links { width: 100%; justify-content: center; }
+            .nav-links a { padding: 10px 15px; height: auto; border-radius: 8px; }
         }
 
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .modal-header {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 25px;
-            color: var(--primary);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 28px;
-            cursor: pointer;
-            color: #999;
-            transition: all 0.3s;
-        }
-
-        .close-btn:hover { color: var(--primary); }
-
-        .modal-body {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group label {
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .form-group input, .form-group select {
-            padding: 12px;
-            border: 2px solid #e1e8ed;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-
-        .form-group input:focus, .form-group select:focus {
-            border-color: var(--primary);
-            outline: none;
-            box-shadow: 0 0 0 4px rgba(31, 119, 210, 0.1);
-        }
-
-        .modal-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 25px;
-        }
-
-        /* ============ AUTH MODAL ============ */
-        .auth-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 3000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .auth-modal.hidden { display: none; }
-
-        .auth-content {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .auth-content h2 {
-            color: var(--primary);
-            margin-bottom: 30px;
-            font-size: 24px;
-        }
-
-        .auth-content .form-group {
-            margin-bottom: 15px;
-        }
-
-        .auth-content input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e1e8ed;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-
-        .auth-content input:focus {
-            border-color: var(--primary);
-            outline: none;
-        }
-
-        .auth-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 20px;
-        }
-
-        /* ============ RESPONSIVE ============ */
-        @media (max-width: 1024px) {
-            .main-grid { grid-template-columns: 1fr; }
-            .teams-score { grid-template-columns: 1fr; gap: 15px; }
-            .vs-divider { display: none; }
-        }
-
-        @media (max-width: 768px) {
-            .navbar { padding: 0 3%; height: 70px; }
-            .logo { font-size: 22px; }
-            .container { margin: 20px auto; }
-            .match-header { padding: 25px; }
-            .scoring-grid { grid-template-columns: repeat(2, 1fr); }
-            .modal-content { padding: 25px; }
-        }
-
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @media (max-width: 600px) {
+            .nav-links { flex-wrap: wrap; gap: 5px; }
+            .nav-links a { font-size: 12px; padding: 8px 10px; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .header-flex { flex-direction: column; align-items: stretch; }
+            .btn { font-size: 14px; }
         }
     </style>
 </head>
 <body>
-    <!-- AUTH MODAL -->
-    <div class="auth-modal" id="authModal">
-        <div class="auth-content">
-            <h2>Firebase Setup</h2>
-            <div class="form-group">
-                <label>Firebase Project ID</label>
-                <input type="text" id="projectId" placeholder="your-project-id">
+
+    <!-- AUTH SECTION -->
+    <div id="auth-section" class="auth-wrapper">
+        <div id="login-card" class="auth-card">
+            <div class="logo-text">CRICHEROES<span>V3</span></div>
+            <p style="color: #666; margin-bottom: 30px; font-weight: 500;">SUPER KINGS PRO EDITION</p>
+            
+            <form id="login-form">
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email Address</label>
+                    <input type="email" id="login-email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> Login to Dashboard</button>
+            </form>
+
+            <div style="margin: 25px 0; position: relative; border-top: 1px solid #eee;">
+                <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: white; padding: 0 15px; color: #999; font-size: 14px;">OR</span>
             </div>
-            <div class="form-group">
-                <label>API Key</label>
-                <input type="text" id="apiKey" placeholder="your-api-key">
-            </div>
-            <div class="form-group">
-                <label>Database URL</label>
-                <input type="text" id="databaseUrl" placeholder="https://your-project.firebaseio.com">
-            </div>
-            <div class="auth-buttons">
-                <button class="btn btn-danger" onclick="skipFirebase()">Skip</button>
-                <button class="btn btn-success" onclick="initializeFirebase()">Connect</button>
-            </div>
-            <p style="margin-top: 20px; font-size: 12px; color: #999;">
-                Leave empty to use local storage only
+
+            <button id="google-login-btn" class="btn google-btn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="20">
+                Continue with Google
+            </button>
+
+            <p style="margin-top: 30px; color: #666; font-size: 15px;">
+                New to the Pride? <a onclick="toggleAuth()" style="color: var(--csk-blue); font-weight: 700; cursor: pointer; text-decoration: underline;">Create Account</a>
+            </p>
+        </div>
+
+        <div id="signup-card" class="auth-card hidden">
+            <div class="logo-text">CRICHEROES<span>V3</span></div>
+            <p style="color: #666; margin-bottom: 30px; font-weight: 500;">JOIN THE SQUAD</p>
+            
+            <form id="signup-form">
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email Address</label>
+                    <input type="email" id="signup-email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="signup-password" placeholder="Min 6 characters" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus"></i> Create Account</button>
+            </form>
+
+            <p style="margin-top: 30px; color: #666; font-size: 15px;">
+                Already a member? <a onclick="toggleAuth()" style="color: var(--csk-blue); font-weight: 700; cursor: pointer; text-decoration: underline;">Login Now</a>
             </p>
         </div>
     </div>
 
-    <!-- NAVBAR -->
-    <div class="navbar">
-        <div class="logo"><i class="fas fa-cricket"></i> CricketPro</div>
-        <div class="nav-right">
-            <div class="sync-status">
-                <div class="sync-dot"></div>
-                <span id="syncStatus">Syncing...</span>
+    <!-- APP SECTION -->
+    <div id="app-section" class="hidden">
+        <nav class="navbar">
+            <div class="logo-text" style="color: var(--csk-yellow); font-size: 28px;">CRICHEROES<span>V3</span></div>
+            <ul class="nav-links">
+                <li><a onclick="showPage('dashboard')" id="nav-dashboard" class="active"><i class="fas fa-chart-line"></i>&nbsp;Dashboard</a></li>
+                <li><a onclick="showPage('players')" id="nav-players"><i class="fas fa-users"></i>&nbsp;Players</a></li>
+                <li><a onclick="showPage('matches')" id="nav-matches"><i class="fas fa-cricket-bat-ball"></i>&nbsp;Matches</a></li>
+                <li><a onclick="showPage('teams')" id="nav-teams"><i class="fas fa-shield-halved"></i>&nbsp;Teams</a></li>
+            </ul>
+            <button id="logout-btn" class="btn" style="width: auto; padding: 10px 20px; background: rgba(255,255,255,0.15); color: white; font-size: 14px; border: 1px solid rgba(255,255,255,0.3);"><i class="fas fa-power-off"></i>&nbsp;Logout</button>
+        </nav>
+
+        <div class="container">
+            <!-- Dashboard -->
+            <div id="page-dashboard" class="page">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon-circle"><i class="fas fa-trophy"></i></div>
+                        <div class="stat-info"><h3 id="stat-matches">0</h3><p>Total Matches</p></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon-circle"><i class="fas fa-user-check"></i></div>
+                        <div class="stat-info"><h3 id="stat-players">0</h3><p>Active Players</p></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon-circle"><i class="fas fa-shield-heart"></i></div>
+                        <div class="stat-info"><h3 id="stat-teams">0</h3><p>Total Teams</p></div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="header-flex">
+                        <h2><i class="fas fa-history"></i> Recent Matches</h2>
+                        <button onclick="clearCollection('matches')" class="btn" style="width:auto; background:#eee; color:#666; font-size:12px;"><i class="fas fa-trash-can"></i> Clear All</button>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Matchup</th>
+                                    <th>Score</th>
+                                    <th>Winner</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-matches-list"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <div class="live-indicator">
-                <div class="live-dot"></div>
-                LIVE
+
+            <!-- Players -->
+            <div id="page-players" class="page hidden">
+                <div class="section-card">
+                    <div class="header-flex">
+                        <h2><i class="fas fa-id-card"></i> Player Roster</h2>
+                        <div style="display:flex; gap:10px;">
+                            <button onclick="clearCollection('players')" class="btn" style="width:auto; background:#eee; color:#666; font-size:12px;"><i class="fas fa-trash-can"></i> Clear All</button>
+                            <button onclick="openModal('player-modal')" class="btn btn-primary" style="width: auto;"><i class="fas fa-plus"></i> Add Player</button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Team</th>
+                                    <th>Matches</th>
+                                    <th>Runs</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="players-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Matches -->
+            <div id="page-matches" class="page hidden">
+                <div class="section-card">
+                    <div class="header-flex">
+                        <h2><i class="fas fa-calendar-check"></i> Match History</h2>
+                        <button onclick="openModal('match-modal')" class="btn btn-primary" style="width: auto;"><i class="fas fa-plus"></i> New Match</button>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Team A</th>
+                                    <th>Team B</th>
+                                    <th>Result</th>
+                                    <th>Venue</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="matches-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teams -->
+            <div id="page-teams" class="page hidden">
+                <div class="section-card">
+                    <div class="header-flex">
+                        <h2><i class="fas fa-shield"></i> Teams</h2>
+                        <button onclick="openModal('team-modal')" class="btn btn-primary" style="width: auto;"><i class="fas fa-plus"></i> Create Team</button>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Team Name</th>
+                                    <th>Created By</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teams-list"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- CONTAINER -->
-    <div class="container">
-        <!-- MATCH HEADER -->
-        <div class="match-header">
-            <div class="match-title">T20 Match - Live Scoring</div>
-            <div class="match-status" id="matchStatus">Match Status: In Progress</div>
-            <div class="teams-score">
-                <div class="team-card">
-                    <div class="team-name" id="team1Name">Team A</div>
-                    <div class="team-score" id="team1Score">0</div>
-                    <div class="team-overs" id="team1Overs">0.0 Overs</div>
-                </div>
-                <div class="vs-divider">VS</div>
-                <div class="team-card">
-                    <div class="team-name" id="team2Name">Team B</div>
-                    <div class="team-score" id="team2Score">0</div>
-                    <div class="team-overs" id="team2Overs">0.0 Overs</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- MAIN GRID -->
-        <div class="main-grid">
-            <!-- LEFT: SCORING PANEL -->
-            <div class="scoring-panel">
-                <div class="panel-title">
-                    <i class="fas fa-edit"></i> Live Scoring
-                </div>
-
-                <!-- SCORING INPUTS -->
-                <div class="scoring-grid">
-                    <div class="input-group">
-                        <label>Runs</label>
-                        <input type="number" id="runsInput" value="0" min="0">
-                    </div>
-                    <div class="input-group">
-                        <label>Wickets</label>
-                        <input type="number" id="wicketsInput" value="0" min="0" max="10">
-                    </div>
-                    <div class="input-group">
-                        <label>Overs</label>
-                        <input type="number" id="oversInput" value="0" min="0" max="20" step="0.1">
-                    </div>
-                    <div class="input-group">
-                        <label>Balls</label>
-                        <input type="number" id="ballsInput" value="0" min="0" max="5">
-                    </div>
-                </div>
-
-                <!-- QUICK BUTTONS -->
-                <div class="panel-title" style="margin-top: 25px;">
-                    <i class="fas fa-bolt"></i> Quick Actions
-                </div>
-                <div class="quick-buttons">
-                    <button class="quick-btn" onclick="addRuns(1)">+1</button>
-                    <button class="quick-btn" onclick="addRuns(2)">+2</button>
-                    <button class="quick-btn" onclick="addRuns(3)">+3</button>
-                    <button class="quick-btn" onclick="addRuns(4)">+4</button>
-                    <button class="quick-btn" onclick="addRuns(6)">+6</button>
-                    <button class="quick-btn" onclick="addWide()">WIDE</button>
-                    <button class="quick-btn" onclick="addNoBall()">NO BALL</button>
-                    <button class="quick-btn" onclick="addWicket()">WICKET</button>
-                </div>
-
-                <!-- STATS DISPLAY -->
-                <div class="panel-title" style="margin-top: 25px;">
-                    <i class="fas fa-chart-bar"></i> Current Stats
-                </div>
-                <div class="stats-display">
-                    <div class="stat-box">
-                        <div class="stat-label">Run Rate</div>
-                        <div class="stat-value" id="runRate">0.00</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Avg/Ball</div>
-                        <div class="stat-value" id="avgPerBall">0.00</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Balls Left</div>
-                        <div class="stat-value" id="ballsLeft">120</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Req. Rate</div>
-                        <div class="stat-value" id="reqRate">0.00</div>
-                    </div>
-                </div>
-
-                <!-- ACTION BUTTONS -->
-                <div class="action-buttons" style="margin-top: 25px;">
-                    <button class="btn btn-success" onclick="updateScore()">
-                        <i class="fas fa-check"></i> Update
-                    </button>
-                    <button class="btn btn-primary" onclick="openEditModal()">
-                        <i class="fas fa-pencil"></i> Edit
-                    </button>
-                    <button class="btn btn-warning" onclick="undoLastBall()">
-                        <i class="fas fa-undo"></i> Undo
-                    </button>
-                    <button class="btn btn-danger" onclick="resetMatch()">
-                        <i class="fas fa-refresh"></i> Reset
-                    </button>
-                </div>
-            </div>
-
-            <!-- RIGHT: SIDEBAR -->
-            <div class="sidebar">
-                <!-- BATTING TEAM -->
-                <div class="sidebar-card">
-                    <div class="sidebar-title">
-                        <i class="fas fa-users"></i> Batting Team
-                    </div>
-                    <div class="player-input">
-                        <input type="text" id="batterInput" placeholder="Batter name">
-                        <button onclick="addBatter()"><i class="fas fa-plus"></i></button>
-                    </div>
-                    <div class="player-list" id="batterList"></div>
-                </div>
-
-                <!-- BOWLING TEAM -->
-                <div class="sidebar-card">
-                    <div class="sidebar-title">
-                        <i class="fas fa-baseball-ball"></i> Bowling Team
-                    </div>
-                    <div class="player-input">
-                        <input type="text" id="bowlerInput" placeholder="Bowler name">
-                        <button onclick="addBowler()"><i class="fas fa-plus"></i></button>
-                    </div>
-                    <div class="player-list" id="bowlerList"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- BALL BY BALL -->
-        <div class="ball-by-ball">
-            <div class="panel-title">
-                <i class="fas fa-circle"></i> Ball-by-Ball
-            </div>
-            <div class="ball-list scrollbar-hide" id="ballList"></div>
-        </div>
-
-        <!-- LIVE UPDATES -->
-        <div class="live-updates">
-            <div class="panel-title">
-                <i class="fas fa-bell"></i> Live Updates
-            </div>
-            <div id="updatesList"></div>
-        </div>
-    </div>
-
-    <!-- EDIT MODAL -->
-    <div class="modal" id="editModal">
+    <!-- MODALS -->
+    <div id="player-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <span>Edit Match Details</span>
-                <button class="close-btn" onclick="closeEditModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Team 1 Name</label>
-                    <input type="text" id="editTeam1Name">
-                </div>
-                <div class="form-group">
-                    <label>Team 1 Runs</label>
-                    <input type="number" id="editTeam1Runs" min="0">
-                </div>
-                <div class="form-group">
-                    <label>Team 1 Wickets</label>
-                    <input type="number" id="editTeam1Wickets" min="0" max="10">
-                </div>
-                <div class="form-group">
-                    <label>Team 1 Overs</label>
-                    <input type="number" id="editTeam1Overs" min="0" step="0.1">
-                </div>
-                <div class="form-group">
-                    <label>Team 2 Name</label>
-                    <input type="text" id="editTeam2Name">
-                </div>
-                <div class="form-group">
-                    <label>Team 2 Runs</label>
-                    <input type="number" id="editTeam2Runs" min="0">
-                </div>
-                <div class="form-group">
-                    <label>Team 2 Wickets</label>
-                    <input type="number" id="editTeam2Wickets" min="0" max="10">
-                </div>
-                <div class="form-group">
-                    <label>Team 2 Overs</label>
-                    <input type="number" id="editTeam2Overs" min="0" step="0.1">
-                </div>
-                <div class="modal-buttons">
-                    <button class="btn btn-danger" onclick="closeEditModal()">Cancel</button>
-                    <button class="btn btn-success" onclick="saveEditedMatch()">Save</button>
-                </div>
-            </div>
+            <span class="close-btn" onclick="closeModal('player-modal')"><i class="fas fa-times"></i></span>
+            <h2><i class="fas fa-user-plus"></i> Add New Player</h2>
+            <form id="player-form" style="margin-top:20px;">
+                <div class="form-group"><label>Player Name</label><input type="text" id="p-name" placeholder="e.g. MS Dhoni" required></div>
+                <div class="form-group"><label>Assign Team</label><select id="p-team" required><option value="">Loading teams...</option></select></div>
+                <button type="submit" class="btn btn-primary">Save Player</button>
+            </form>
         </div>
     </div>
 
-    <script>
-        // ============ FIREBASE INITIALIZATION ============
-        let db = null;
-        let firebaseEnabled = false;
-        let matchId = 'match_' + Date.now();
+    <div id="match-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('match-modal')"><i class="fas fa-times"></i></span>
+            <h2><i class="fas fa-trophy"></i> Record Match</h2>
+            <form id="match-form" style="margin-top:20px;">
+                <div class="form-group"><label>Date</label><input type="date" id="m-date" required></div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                    <div class="form-group"><label>Team A</label><select id="m-team-a" required></select></div>
+                    <div class="form-group"><label>Team B</label><select id="m-team-b" required></select></div>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                    <div class="form-group"><label>Score A</label><input type="number" id="m-score-a" placeholder="Runs" required></div>
+                    <div class="form-group"><label>Score B</label><input type="number" id="m-score-b" placeholder="Runs" required></div>
+                </div>
+                <div class="form-group"><label>Venue</label><input type="text" id="m-venue" placeholder="e.g. Chepauk Stadium" required></div>
+                <button type="submit" class="btn btn-primary">Save Match Result</button>
+            </form>
+        </div>
+    </div>
 
-        async function initializeFirebase() {
-            const projectId = document.getElementById('projectId').value;
-            const apiKey = document.getElementById('apiKey').value;
-            const databaseUrl = document.getElementById('databaseUrl').value;
+    <div id="team-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('team-modal')"><i class="fas fa-times"></i></span>
+            <h2><i class="fas fa-shield-plus"></i> Create Team</h2>
+            <form id="team-form" style="margin-top:20px;">
+                <div class="form-group"><label>Team Name</label><input type="text" id="t-name" placeholder="e.g. Chennai Super Kings" required></div>
+                <button type="submit" class="btn btn-primary">Create Team</button>
+            </form>
+        </div>
+    </div>
 
-            if (!projectId || !apiKey || !databaseUrl) {
-                skipFirebase();
-                return;
-            }
+    <!-- FIREBASE SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc, deleteDoc, setDoc, serverTimestamp, orderBy, limit, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-            try {
-                    const firebaseConfig = {
+        // --- FIREBASE CONFIG ---
+      const firebaseConfig = {
   apiKey: "AIzaSyDDew880iGDPpx2giFC9RXDV6SN2m99cUk",
   authDomain: "otp-login-app-2f5d5.firebaseapp.com",
   projectId: "otp-login-app-2f5d5",
@@ -897,345 +492,262 @@
   appId: "1:660933750433:web:dacff67b6c6fae6264cae0"
 };
 
-                firebase.initializeApp(firebaseConfig);
-                db = firebase.database();
-                firebaseEnabled = true;
-                document.getElementById('syncStatus').textContent = 'Connected';
-                document.getElementById('authModal').classList.add('hidden');
-                loadMatchData();
-            } catch (error) {
-                console.error('Firebase initialization error:', error);
-                skipFirebase();
-            }
-        }
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const googleProvider = new GoogleAuthProvider();
 
-        function skipFirebase() {
-            firebaseEnabled = false;
-            document.getElementById('syncStatus').textContent = 'Local Storage';
-            document.getElementById('authModal').classList.add('hidden');
-            loadMatchData();
-        }
-
-        // ============ STATE MANAGEMENT ============
-        const state = {
-            team1: {
-                name: 'Team A',
-                runs: 0,
-                wickets: 0,
-                overs: 0,
-                balls: 0,
-                batters: [],
-                bowlers: []
-            },
-            team2: {
-                name: 'Team B',
-                runs: 0,
-                wickets: 0,
-                overs: 0,
-                balls: 0,
-                batters: [],
-                bowlers: []
-            },
-            currentTeam: 1,
-            ballHistory: [],
-            updates: []
+        // --- UI STATE ---
+        window.toggleAuth = () => {
+            document.getElementById('login-card').classList.toggle('hidden');
+            document.getElementById('signup-card').classList.toggle('hidden');
         };
 
-        // ============ LOAD/SAVE DATA ============
-        function loadMatchData() {
-            if (firebaseEnabled) {
-                db.ref('matches/' + matchId).on('value', snapshot => {
-                    if (snapshot.exists()) {
-                        Object.assign(state, snapshot.val());
-                        updateDisplay();
-                    }
-                });
-            } else {
-                const saved = localStorage.getItem('cricketMatch_' + matchId);
-                if (saved) {
-                    Object.assign(state, JSON.parse(saved));
-                    updateDisplay();
-                }
-            }
-        }
-
-        function saveMatchData() {
-            if (firebaseEnabled) {
-                db.ref('matches/' + matchId).set(state).catch(error => {
-                    console.error('Firebase save error:', error);
-                    saveToLocalStorage();
-                });
-            } else {
-                saveToLocalStorage();
-            }
-        }
-
-        function saveToLocalStorage() {
-            localStorage.setItem('cricketMatch_' + matchId, JSON.stringify(state));
-        }
-
-        // ============ UPDATE DISPLAY ============
-        function updateDisplay() {
-            const team = state['team' + state.currentTeam];
-            document.getElementById('runsInput').value = team.runs;
-            document.getElementById('wicketsInput').value = team.wickets;
-            document.getElementById('oversInput').value = team.overs;
-            document.getElementById('ballsInput').value = team.balls;
-
-            document.getElementById('team1Name').textContent = state.team1.name;
-            document.getElementById('team1Score').textContent = state.team1.runs;
-            document.getElementById('team1Overs').textContent = state.team1.overs.toFixed(1) + ' Overs';
-
-            document.getElementById('team2Name').textContent = state.team2.name;
-            document.getElementById('team2Score').textContent = state.team2.runs;
-            document.getElementById('team2Overs').textContent = state.team2.overs.toFixed(1) + ' Overs';
-
-            updateStats();
-            updateBallDisplay();
-            renderBatterList();
-            renderBowlerList();
-        }
-
-        // ============ QUICK ACTIONS ============
-        function addRuns(runs) {
-            const team = state['team' + state.currentTeam];
-            team.runs += runs;
-            team.balls++;
-            if (team.balls > 5) {
-                team.overs++;
-                team.balls = 0;
-            }
-            addBallRecord(runs);
-            addUpdate(`${runs} runs scored - Total: ${team.runs}/${team.wickets}`);
-            updateDisplay();
-            saveMatchData();
-        }
-
-        function addWide() {
-            const team = state['team' + state.currentTeam];
-            team.runs += 1;
-            addBallRecord('W');
-            addUpdate('Wide ball - 1 run added');
-            updateDisplay();
-            saveMatchData();
-        }
-
-        function addNoBall() {
-            const team = state['team' + state.currentTeam];
-            team.runs += 1;
-            addBallRecord('NB');
-            addUpdate('No ball - 1 run added');
-            updateDisplay();
-            saveMatchData();
-        }
-
-        function addWicket() {
-            const team = state['team' + state.currentTeam];
-            team.wickets++;
-            team.balls++;
-            if (team.balls > 5) {
-                team.overs++;
-                team.balls = 0;
-            }
-            addBallRecord('W');
-            addUpdate(`Wicket! Total: ${team.runs}/${team.wickets}`);
-            updateDisplay();
-            saveMatchData();
-        }
-
-        // ============ BALL RECORD ============
-        function addBallRecord(value) {
-            state.ballHistory.push({
-                value: value,
-                team: state.currentTeam,
-                time: new Date().toLocaleTimeString()
-            });
-        }
-
-        function updateBallDisplay() {
-            const ballList = document.getElementById('ballList');
-            ballList.innerHTML = state.ballHistory.map((ball, index) => {
-                let className = 'ball ';
-                if (ball.value === 'W') className += 'wicket';
-                else if (ball.value === 'WD') className += 'wide';
-                else if (ball.value === 'NB') className += 'no-ball';
-                else className += 'run-' + ball.value;
-                
-                return `<div class="ball ${className}" title="Ball ${index + 1}">${ball.value}</div>`;
-            }).join('');
-        }
-
-        // ============ UPDATE SCORE ============
-        function updateScore() {
-            const team = state['team' + state.currentTeam];
-            team.runs = parseInt(document.getElementById('runsInput').value);
-            team.wickets = parseInt(document.getElementById('wicketsInput').value);
-            team.overs = parseFloat(document.getElementById('oversInput').value);
-            team.balls = parseInt(document.getElementById('ballsInput').value);
+        window.showPage = (pageId) => {
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+            document.getElementById(`page-${pageId}`).classList.remove('hidden');
+            document.getElementById(`nav-${pageId}`).classList.add('active');
             
-            addUpdate(`Score updated: ${team.runs}/${team.wickets} (${team.overs.toFixed(1)} Overs)`);
-            updateDisplay();
-            saveMatchData();
-        }
+            if(pageId === 'dashboard') loadDashboard();
+            if(pageId === 'players') loadPlayers();
+            if(pageId === 'matches') loadMatches();
+            if(pageId === 'teams') loadTeams();
+        };
 
-        // ============ EDIT MODAL ============
-        function openEditModal() {
-            document.getElementById('editTeam1Name').value = state.team1.name;
-            document.getElementById('editTeam1Runs').value = state.team1.runs;
-            document.getElementById('editTeam1Wickets').value = state.team1.wickets;
-            document.getElementById('editTeam1Overs').value = state.team1.overs;
+        window.openModal = (id) => {
+            document.getElementById(id).style.display = 'flex';
+            if(id === 'player-modal' || id === 'match-modal') updateDropdowns();
+        };
+        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
 
-            document.getElementById('editTeam2Name').value = state.team2.name;
-            document.getElementById('editTeam2Runs').value = state.team2.runs;
-            document.getElementById('editTeam2Wickets').value = state.team2.wickets;
-            document.getElementById('editTeam2Overs').value = state.team2.overs;
+        const showToast = (msg, type='success') => {
+            const t = document.createElement('div');
+            t.className = `toast`;
+            t.style.background = type === 'success' ? 'var(--success)' : 'var(--error)';
+            t.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${msg}`;
+            document.body.appendChild(t);
+            setTimeout(() => { t.style.opacity='0'; setTimeout(() => t.remove(), 300); }, 3000);
+        };
 
-            document.getElementById('editModal').classList.add('active');
-        }
-
-        function closeEditModal() {
-            document.getElementById('editModal').classList.remove('active');
-        }
-
-        function saveEditedMatch() {
-            state.team1.name = document.getElementById('editTeam1Name').value;
-            state.team1.runs = parseInt(document.getElementById('editTeam1Runs').value);
-            state.team1.wickets = parseInt(document.getElementById('editTeam1Wickets').value);
-            state.team1.overs = parseFloat(document.getElementById('editTeam1Overs').value);
-
-            state.team2.name = document.getElementById('editTeam2Name').value;
-            state.team2.runs = parseInt(document.getElementById('editTeam2Runs').value);
-            state.team2.wickets = parseInt(document.getElementById('editTeam2Wickets').value);
-            state.team2.overs = parseFloat(document.getElementById('editTeam2Overs').value);
-
-            addUpdate('Match details updated');
-            closeEditModal();
-            updateDisplay();
-            saveMatchData();
-        }
-
-        // ============ STATS CALCULATION ============
-        function updateStats() {
-            const team = state['team' + state.currentTeam];
-            const totalBalls = team.overs * 6 + team.balls;
-            const runRate = totalBalls > 0 ? (team.runs / totalBalls * 6).toFixed(2) : 0;
-            const avgPerBall = totalBalls > 0 ? (team.runs / totalBalls).toFixed(2) : 0;
-            const ballsLeft = 120 - totalBalls;
-            const reqRate = ballsLeft > 0 ? (team.runs / ballsLeft * 6).toFixed(2) : 0;
-
-            document.getElementById('runRate').textContent = runRate;
-            document.getElementById('avgPerBall').textContent = avgPerBall;
-            document.getElementById('ballsLeft').textContent = ballsLeft;
-            document.getElementById('reqRate').textContent = reqRate;
-        }
-
-        // ============ PLAYERS ============
-        function addBatter() {
-            const input = document.getElementById('batterInput');
-            if (input.value.trim()) {
-                state['team' + state.currentTeam].batters.push(input.value);
-                input.value = '';
-                renderBatterList();
-                addUpdate(`Batter added: ${input.value}`);
-                saveMatchData();
-            }
-        }
-
-        function addBowler() {
-            const input = document.getElementById('bowlerInput');
-            if (input.value.trim()) {
-                state['team' + state.currentTeam].bowlers.push(input.value);
-                input.value = '';
-                renderBowlerList();
-                addUpdate(`Bowler added: ${input.value}`);
-                saveMatchData();
-            }
-        }
-
-        function renderBatterList() {
-            const list = document.getElementById('batterList');
-            list.innerHTML = state['team' + state.currentTeam].batters.map((batter, index) => `
-                <div class="player-item">
-                    <span>${batter}</span>
-                    <button onclick="removeBatter(${index})">Remove</button>
-                </div>
-            `).join('');
-        }
-
-        function renderBowlerList() {
-            const list = document.getElementById('bowlerList');
-            list.innerHTML = state['team' + state.currentTeam].bowlers.map((bowler, index) => `
-                <div class="player-item">
-                    <span>${bowler}</span>
-                    <button onclick="removeBowler(${index})">Remove</button>
-                </div>
-            `).join('');
-        }
-
-        function removeBatter(index) {
-            state['team' + state.currentTeam].batters.splice(index, 1);
-            renderBatterList();
-            saveMatchData();
-        }
-
-        function removeBowler(index) {
-            state['team' + state.currentTeam].bowlers.splice(index, 1);
-            renderBowlerList();
-            saveMatchData();
-        }
-
-        // ============ LIVE UPDATES ============
-        function addUpdate(message) {
-            const time = new Date().toLocaleTimeString();
-            state.updates.unshift({ message, time });
-            if (state.updates.length > 50) state.updates.pop();
-            renderUpdates();
-            saveMatchData();
-        }
-
-        function renderUpdates() {
-            const list = document.getElementById('updatesList');
-            list.innerHTML = state.updates.map(update => `
-                <div class="update-item">
-                    ${update.message}
-                    <div class="update-time">${update.time}</div>
-                </div>
-            `).join('');
-        }
-
-        // ============ UTILITY FUNCTIONS ============
-        function undoLastBall() {
-            if (state.ballHistory.length > 0) {
-                state.ballHistory.pop();
-                addUpdate('Last ball removed');
-                updateDisplay();
-                saveMatchData();
-            }
-        }
-
-        function resetMatch() {
-            if (confirm('Are you sure you want to reset the match?')) {
-                state.team1 = { name: 'Team A', runs: 0, wickets: 0, overs: 0, balls: 0, batters: [], bowlers: [] };
-                state.team2 = { name: 'Team B', runs: 0, wickets: 0, overs: 0, balls: 0, batters: [], bowlers: [] };
-                state.ballHistory = [];
-                state.updates = [];
-                addUpdate('Match reset');
-                updateDisplay();
-                saveMatchData();
-            }
-        }
-
-        // ============ INITIALIZATION ============
-        document.addEventListener('DOMContentLoaded', () => {
-            // Check if Firebase is already initialized
-            if (!firebaseEnabled) {
-                // Show auth modal after a short delay
-                setTimeout(() => {
-                    // Auto-skip for demo purposes
-                    skipFirebase();
-                }, 500);
+        // --- AUTH LOGIC ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('app-section').classList.remove('hidden');
+                loadDashboard();
+                updateDropdowns();
+            } else {
+                document.getElementById('app-section').classList.add('hidden');
+                document.getElementById('auth-section').classList.remove('hidden');
             }
         });
+
+        document.getElementById('google-login-btn').onclick = async () => {
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                showToast("Logged in with Google!");
+            } catch (err) {
+                showToast("Login failed: " + err.message, 'error');
+            }
+        };
+
+        document.getElementById('login-form').onsubmit = async (e) => {
+            e.preventDefault();
+            try {
+                await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-password').value);
+                showToast("Welcome back!");
+            } catch (err) { showToast(err.message, 'error'); }
+        };
+
+        document.getElementById('signup-form').onsubmit = async (e) => {
+            e.preventDefault();
+            try {
+                await createUserWithEmailAndPassword(auth, document.getElementById('signup-email').value, document.getElementById('signup-password').value);
+                showToast("Account created!");
+            } catch (err) { showToast(err.message, 'error'); }
+        };
+
+        document.getElementById('logout-btn').onclick = () => signOut(auth);
+
+        // --- DATA LOGIC ---
+        async function loadDashboard() {
+            try {
+                const mSnap = await getDocs(collection(db, "matches"));
+                const pSnap = await getDocs(collection(db, "players"));
+                const tSnap = await getDocs(collection(db, "teams"));
+                document.getElementById('stat-matches').textContent = mSnap.size;
+                document.getElementById('stat-players').textContent = pSnap.size;
+                document.getElementById('stat-teams').textContent = tSnap.size;
+
+                const q = query(collection(db, "matches"), orderBy("date", "desc"), limit(5));
+                const recentSnap = await getDocs(q);
+                const list = document.getElementById('recent-matches-list');
+                list.innerHTML = recentSnap.empty ? '<tr><td colspan="4" class="empty-state"><i class="fas fa-ghost"></i>No matches yet</td></tr>' : '';
+                recentSnap.forEach(d => {
+                    const m = d.data();
+                    list.innerHTML += `<tr>
+                        <td>${new Date(m.date.seconds*1000).toLocaleDateString()}</td>
+                        <td style="font-weight:700">${m.teamA} vs ${m.teamB}</td>
+                        <td style="color:var(--csk-blue); font-weight:700">${m.scoreA}-${m.scoreB}</td>
+                        <td><span style="background:#d4edda; color:#155724; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:700;">${m.winner}</span></td>
+                    </tr>`;
+                });
+            } catch (err) { 
+                console.error(err);
+                if (err.code === 'permission-denied') showToast("Permission Denied. Check Firestore Rules.", 'error');
+            }
+        }
+
+        async function loadPlayers() {
+            try {
+                const snap = await getDocs(collection(db, "players"));
+                const list = document.getElementById('players-list');
+                list.innerHTML = snap.empty ? '<tr><td colspan="5" class="empty-state"><i class="fas fa-user-slash"></i>No players found</td></tr>' : '';
+                snap.forEach(d => {
+                    const p = d.data();
+                    list.innerHTML += `<tr>
+                        <td><i class="fas fa-user"></i>&nbsp; ${p.name}</td>
+                        <td>${p.teamName}</td>
+                        <td>${p.matchesPlayed||0}</td>
+                        <td>${p.totalRuns||0}</td>
+                        <td><button class="action-btn btn-delete" onclick="deleteDocData('players', '${d.id}', loadPlayers)"><i class="fas fa-trash"></i></button></td>
+                    </tr>`;
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        async function loadMatches() {
+            try {
+                const snap = await getDocs(query(collection(db, "matches"), orderBy("date", "desc")));
+                const list = document.getElementById('matches-list');
+                list.innerHTML = snap.empty ? '<tr><td colspan="6" class="empty-state"><i class="fas fa-calendar-xmark"></i>No match history</td></tr>' : '';
+                snap.forEach(d => {
+                    const m = d.data();
+                    list.innerHTML += `<tr>
+                        <td>${new Date(m.date.seconds*1000).toLocaleDateString()}</td>
+                        <td>${m.teamA}</td>
+                        <td>${m.teamB}</td>
+                        <td style="font-weight:700">${m.scoreA}-${m.scoreB} (${m.winner})</td>
+                        <td><i class="fas fa-location-dot"></i> ${m.venue}</td>
+                        <td><button class="action-btn btn-delete" onclick="deleteDocData('matches', '${d.id}', loadMatches)"><i class="fas fa-trash"></i></button></td>
+                    </tr>`;
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        async function loadTeams() {
+            try {
+                const snap = await getDocs(collection(db, "teams"));
+                const list = document.getElementById('teams-list');
+                list.innerHTML = snap.empty ? '<tr><td colspan="3" class="empty-state"><i class="fas fa-shield-slash"></i>No teams created</td></tr>' : '';
+                snap.forEach(d => {
+                    const t = d.data();
+                    list.innerHTML += `<tr>
+                        <td><i class="fas fa-shield"></i>&nbsp; ${t.teamName}</td>
+                        <td>${t.createdByEmail||'Admin'}</td>
+                        <td><button class="action-btn btn-delete" onclick="deleteDocData('teams', '${d.id}', loadTeams)"><i class="fas fa-trash"></i></button></td>
+                    </tr>`;
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        window.deleteDocData = async (coll, id, callback) => {
+            if(confirm("Are you sure you want to delete this record?")) {
+                try {
+                    await deleteDoc(doc(db, coll, id));
+                    showToast("Record deleted!");
+                    callback();
+                } catch (err) { showToast("Error: " + err.message, 'error'); }
+            }
+        };
+
+        window.clearCollection = async (collName) => {
+            if(confirm(`WARNING: This will delete ALL ${collName}. Continue?`)) {
+                try {
+                    const snap = await getDocs(collection(db, collName));
+                    const batch = writeBatch(db);
+                    snap.forEach(d => batch.delete(d.ref));
+                    await batch.commit();
+                    showToast(`All ${collName} cleared!`);
+                    if(collName === 'matches') loadMatches();
+                    if(collName === 'players') loadPlayers();
+                    if(collName === 'teams') loadTeams();
+                    loadDashboard();
+                } catch (err) { showToast(err.message, 'error'); }
+            }
+        };
+
+        async function updateDropdowns() {
+            try {
+                const snap = await getDocs(collection(db, "teams"));
+                const pTeam = document.getElementById('p-team');
+                const mTeamA = document.getElementById('m-team-a');
+                const mTeamB = document.getElementById('m-team-b');
+                
+                const options = snap.empty ? '<option value="">No teams available</option>' : '<option value="">Select Team</option>';
+                [pTeam, mTeamA, mTeamB].forEach(el => el.innerHTML = options);
+                
+                snap.forEach(d => {
+                    const t = d.data().teamName;
+                    [pTeam, mTeamA, mTeamB].forEach(el => el.innerHTML += `<option value="${t}">${t}</option>`);
+                });
+            } catch (err) { console.error("Dropdown error:", err); }
+        }
+
+        // --- FORM SUBMISSIONS ---
+        document.getElementById('player-form').onsubmit = async (e) => {
+            e.preventDefault();
+            try {
+                await addDoc(collection(db, "players"), {
+                    name: document.getElementById('p-name').value,
+                    teamName: document.getElementById('p-team').value,
+                    matchesPlayed: 0, totalRuns: 0, wickets: 0, strikeRate: 0,
+                    createdAt: serverTimestamp()
+                });
+                showToast("Player added!");
+                closeModal('player-modal');
+                loadPlayers();
+            } catch (err) { showToast(err.message, 'error'); }
+        };
+
+        document.getElementById('team-form').onsubmit = async (e) => {
+            e.preventDefault();
+            try {
+                await addDoc(collection(db, "teams"), {
+                    teamName: document.getElementById('t-name').value,
+                    createdBy: auth.currentUser.uid,
+                    createdByEmail: auth.currentUser.email,
+                    createdAt: serverTimestamp()
+                });
+                showToast("Team created!");
+                closeModal('team-modal');
+                loadTeams();
+                updateDropdowns();
+            } catch (err) { showToast(err.message, 'error'); }
+        };
+
+        document.getElementById('match-form').onsubmit = async (e) => {
+            e.preventDefault();
+            try {
+                const teamA = document.getElementById('m-team-a').value;
+                const teamB = document.getElementById('m-team-b').value;
+                const scoreA = parseInt(document.getElementById('m-score-a').value);
+                const scoreB = parseInt(document.getElementById('m-score-b').value);
+                const winner = scoreA > scoreB ? teamA : (scoreB > scoreA ? teamB : "Draw");
+
+                await addDoc(collection(db, "matches"), {
+                    date: new Date(document.getElementById('m-date').value),
+                    teamA, teamB, scoreA, scoreB, winner,
+                    venue: document.getElementById('m-venue').value,
+                    createdAt: serverTimestamp()
+                });
+
+                showToast("Match result saved!");
+                closeModal('match-modal');
+                loadDashboard();
+            } catch (err) { showToast(err.message, 'error'); }
+        };
     </script>
 </body>
 </html>

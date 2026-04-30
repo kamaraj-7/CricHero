@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CricketPro Firebase - Live Match Scorer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
+    <style>
+        :root {
+            --primary: #1f77d2;
+            --secondary: #ff6b35;
+            --success: #2ecc71;
+            --danger: #ff4d4d;
+            --warning: #ffc107;
+            --dark: #1a1a1a;
+            --light: #f0f2f5;
+            --white: #ffffff;
+            --shadow: 0 10px 30px rgba(0,0,0,0.1);
+            --shadow-sm: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background: var(--light); color: var(--dark); min-height: 100vh; }
+        h1, h2, h3, .logo { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
+
+        /* ============ NAVBAR ============ */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary) 0%, #1a5fa0 100%);
+            padding: 0 5%;
+            height: 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+        }
+
+        .logo { font-size: 28px; color: var(--secondary); letter-spacing: 2px; }
+        .nav-right { display: flex; gap: 20px; align-items: center; }
+        .live-indicator { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
+        .live-dot { width: 10px; height: 10px; background: var(--danger); border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+        }
+
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* ============ CONTAINER ============ */
+        .container { max-width: 1400px; margin: 40px auto; padding: 0 20px; }
+
+        /* ============ MATCH HEADER ============ */
+        .match-header {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .match-title { font-size: 24px; margin-bottom: 20px; text-align: center; }
+        .match-status { font-size: 14px; opacity: 0.9; text-align: center; margin-bottom: 20px; }
+
+        .teams-score {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 30px;
+            align-items: center;
+            text-align: center;
+        }
+
+        .team-card {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .team-name { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+        .team-score { font-size: 48px; font-weight: 700; margin-bottom: 8px; }
+        .team-overs { font-size: 14px; opacity: 0.9; }
+
+        .vs-divider { font-size: 32px; font-weight: 700; opacity: 0.7; }
+
+        /* ============ MAIN GRID ============ */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* ============ SCORING PANEL ============ */
+        .scoring-panel {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .panel-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+        }
+
+        .scoring-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group input, .input-group select {
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(31, 119, 210, 0.1);
+        }
+
+        /* ============ QUICK BUTTONS ============ */
+        .quick-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .quick-btn {
+            padding: 12px;
+            border: 2px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .quick-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* ============ ACTION BUTTONS ============ */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1a5fa0;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #cc0000;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: var(--dark);
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        /* ============ STATS DISPLAY ============ */
+        .stats-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* ============ SIDEBAR ============ */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .sidebar-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .player-input {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .player-input input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e1e8ed;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .player-input button {
+            padding: 10px 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .player-input button:hover {
+            background: #1a5fa0;
+        }
+
+        .player-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .player-item {
+            background: #f8f9fa;
+            padding: 10px 12px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .player-item button {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .player-item button:hover {
+            background: #cc0000;
+        }
+
+        /* ============ BALL BY BALL ============ */
+        .ball-by-ball {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .ball-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .ball {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #e1e8ed;
+        }
+
+        .ball.run-0 { background: #f8f9fa; color: var(--dark); }
+        .ball.run-1 { background: #e3f2fd; color: var(--primary); }
+        .ball.run-2 { background: #c8e6c9; color: var(--success); }
+        .ball.run-3 { background: #ffe0b2; color: #f57c00; }
+        .ball.run-4 { background: #ffccbc; color: #d84315; }
+        .ball.run-6 { background: #f3e5f5; color: #7b1fa2; }
+        .ball.wicket { background: #ffcdd2; color: var(--danger); }
+        .ball.wide { background: #fff9c4; color: #f57f17; }
+        .ball.no-ball { background: #f1f8e9; color: #558b2f; }
+
+        .ball:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* ============ LIVE UPDATES ============ */
+        .live-updates {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .update-item {
+            padding: 12px;
+            border-left: 4px solid var(--primary);
+            background: #f8f9fa;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            animation: slideInLeft 0.3s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .update-time {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        /* ============ MODAL ============ */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover { color: var(--primary); }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group select {
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(31, 119, 210, 0.1);
+        }
+
+        .modal-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        /* ============ AUTH MODAL ============ */
+        .auth-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 3000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .auth-modal.hidden { display: none; }
+
+        .auth-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .auth-content h2 {
+            color: var(--primary);
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .auth-content .form-group {
+            margin-bottom: 15px;
+        }
+
+        .auth-content input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .auth-content input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .auth-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 1024px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .teams-score { grid-template-columns: 1fr; gap: 15px; }
+            .vs-divider { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 0 3%; height: 70px; }
+            .logo { font-size: 22px; }
+            .container { margin: 20px auto; }
+            .match-header { padding: 25px; }
+            .scoring-grid { grid-template-columns: repeat(2, 1fr); }
+            .modal-content { padding: 25px; }
+        }
+
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- AUTH MODAL -->
+    <div class="auth-modal" id="authModal">
+        <div class="auth-content">
+            <h2>Firebase Setup</h2>
+            <div class="form-group">
+                <label>Firebase Project ID</label>
+                <input type="text" id="projectId" placeholder="your-project-id">
+            </div>
+            <div class="form-group">
+                <label>API Key</label>
+                <input type="text" id="apiKey" placeholder="your-api-key">
+            </div>
+            <div class="form-group">
+                <label>Database URL</label>
+                <input type="text" id="databaseUrl" placeholder="https://your-project.firebaseio.com">
+            </div>
+            <div class="auth-buttons">
+                <button class="btn btn-danger" onclick="skipFirebase()">Skip</button>
+                <button class="btn btn-success" onclick="initializeFirebase()">Connect</button>
+            </div>
+            <p style="margin-top: 20px; font-size: 12px; color: #999;">
+                Leave empty to use local storage only
+            </p>
+        </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="logo"><i class="fas fa-cricket"></i> CricketPro</div>
+        <div class="nav-right">
+            <div class="sync-status">
+                <div class="sync-dot"></div>
+                <span id="syncStatus">Syncing...</span>
+            </div>
+            <div class="live-indicator">
+                <div class="live-dot"></div>
+                LIVE
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTAINER -->
+    <div class="container">
+        <!-- MATCH HEADER -->
+        <div class="match-header">
+            <div class="match-title">T20 Match - Live Scoring</div>
+            <div class="match-status" id="matchStatus">Match Status: In Progress</div>
+            <div class="teams-score">
+                <div class="team-card">
+                    <div class="team-name" id="team1Name">Team A</div>
+                    <div class="team-score" id="team1Score">0</div>
+                    <div class="team-overs" id="team1Overs">0.0 Overs</div>
+                </div>
+                <div class="vs-divider">VS</div>
+                <div class="team-card">
+                    <div class="team-name" id="team2Name">Team B</div>
+                    <div class="team-score" id="team2Score">0</div>
+                    <div class="team-overs" id="team2Overs">0.0 Overs</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN GRID -->
+        <div class="main-grid">
+            <!-- LEFT: SCORING PANEL -->
+            <div class="scoring-panel">
+                <div class="panel-title">
+                    <i class="fas fa-edit"></i> Live Scoring
+                </div>
+
+                <!-- SCORING INPUTS -->
+                <div class="scoring-grid">
+                    <div class="input-group">
+                        <label>Runs</label>
+                        <input type="number" id="runsInput" value="0" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Wickets</label>
+                        <input type="number" id="wicketsInput" value="0" min="0" max="10">
+                    </div>
+                    <div class="input-group">
+                        <label>Overs</label>
+                        <input type="number" id="oversInput" value="0" min="0" max="20" step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label>Balls</label>
+                        <input type="number" id="ballsInput" value="0" min="0" max="5">
+                    </div>
+                </div>
+
+                <!-- QUICK BUTTONS -->
+                <div class="panel-title" style="margin-top: 25px;">
+                    <i class="fas fa-bolt"></i> Quick Actions
+                </div>
+                <div class="quick-buttons">
+                    <button class="quick-btn" onclick="addRuns(1)">+1</button>
+                    <button class="quick-btn" onclick="addRuns(2)">+2</button>
+                    <button class="quick-btn" onclick="addRuns(3)">+3</button>
+                    <button class="quick-btn" onclick="addRuns(4)">+4</button>
+                    <button class="quick-btn" onclick="addRuns(6)">+6</button>
+                    <button class="quick-btn" onclick="addWide()">WIDE</button>
+                    <button class="quick-btn" onclick="addNoBall()">NO BALL</button>
+                    <button class="quick-btn" onclick="addWicket()">WICKET</button>
+                </div>
+
+                <!-- STATS DISPLAY -->
+                <div class="panel-title" style="margin-top: 25px;">
+                    <i class="fas fa-chart-bar"></i> Current Stats
+                </div>
+                <div class="stats-display">
+                    <div class="stat-box">
+                        <div class="stat-label">Run Rate</div>
+                        <div class="stat-value" id="runRate">0.00</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Avg/Ball</div>
+                        <div class="stat-value" id="avgPerBall">0.00</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Balls Left</div>
+                        <div class="stat-value" id="ballsLeft">120</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Req. Rate</div>
+                        <div class="stat-value" id="reqRate">0.00</div>
+                    </div>
+                </div>
+
+                <!-- ACTION BUTTONS -->
+                <div class="action-buttons" style="margin-top: 25px;">
+                    <button class="btn btn-success" onclick="updateScore()">
+                        <i class="fas fa-check"></i> Update
+                    </button>
+                    <button class="btn btn-primary" onclick="openEditModal()">
+                        <i class="fas fa-pencil"></i> Edit
+                    </button>
+                    <button class="btn btn-warning" onclick="undoLastBall()">
+                        <i class="fas fa-undo"></i> Undo
+                    </button>
+                    <button class="btn btn-danger" onclick="resetMatch()">
+                        <i class="fas fa-refresh"></i> Reset
+                    </button>
+                </div>
+            </div>
+
+            <!-- RIGHT: SIDEBAR -->
+            <div class="sidebar">
+                <!-- BATTING TEAM -->
+                <div class="sidebar-card">
+                    <div class="sidebar-title">
+                        <i class="fas fa-users"></i> Batting Team
+                    </div>
+                    <div class="player-input">
+                        <input type="text" id="batterInput" placeholder="Batter name">
+                        <button onclick="addBatter()"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <div class="player-list" id="batterList"></div>
+                </div>
+
+                <!-- BOWLING TEAM -->
+                <div class="sidebar-card">
+                    <div class="sidebar-title">
+                        <i class="fas fa-baseball-ball"></i> Bowling Team
+                    </div>
+                    <div class="player-input">
+                        <input type="text" id="bowlerInput" placeholder="Bowler name">
+                        <button onclick="addBowler()"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <div class="player-list" id="bowlerList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BALL BY BALL -->
+        <div class="ball-by-ball">
+            <div class="panel-title">
+                <i class="fas fa-circle"></i> Ball-by-Ball
+            </div>
+            <div class="ball-list scrollbar-hide" id="ballList"></div>
+        </div>
+
+        <!-- LIVE UPDATES -->
+        <div class="live-updates">
+            <div class="panel-title">
+                <i class="fas fa-bell"></i> Live Updates
+            </div>
+            <div id="updatesList"></div>
+        </div>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Edit Match Details</span>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Team 1 Name</label>
+                    <input type="text" id="editTeam1Name">
+                </div>
+                <div class="form-group">
+                    <label>Team 1 Runs</label>
+                    <input type="number" id="editTeam1Runs" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Team 1 Wickets</label>
+                    <input type="number" id="editTeam1Wickets" min="0" max="10">
+                </div>
+                <div class="form-group">
+                    <label>Team 1 Overs</label>
+                    <input type="number" id="editTeam1Overs" min="0" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Team 2 Name</label>
+                    <input type="text" id="editTeam2Name">
+                </div>
+                <div class="form-group">
+                    <label>Team 2 Runs</label>
+                    <input type="number" id="editTeam2Runs" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Team 2 Wickets</label>
+                    <input type="number" id="editTeam2Wickets" min="0" max="10">
+                </div>
+                <div class="form-group">
+                    <label>Team 2 Overs</label>
+                    <input type="number" id="editTeam2Overs" min="0" step="0.1">
+                </div>
+                <div class="modal-buttons">
+                    <button class="btn btn-danger" onclick="closeEditModal()">Cancel</button>
+                    <button class="btn btn-success" onclick="saveEditedMatch()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ FIREBASE INITIALIZATION ============
+        let db = null;
+        let firebaseEnabled = false;
+        let matchId = 'match_' + Date.now();
+
+        async function initializeFirebase() {
+            const projectId = document.getElementById('projectId').value;
+            const apiKey = document.getElementById('apiKey').value;
+            const databaseUrl = document.getElementById('databaseUrl').value;
+
+            if (!projectId || !apiKey || !databaseUrl) {
+                skipFirebase();
+                return;
+            }
+
+            try {
+                    const firebaseConfig = {
+  apiKey: "AIzaSyDDew880iGDPpx2giFC9RXDV6SN2m99cUk",
+  authDomain: "otp-login-app-2f5d5.firebaseapp.com",
+  projectId: "otp-login-app-2f5d5",
+  storageBucket: "otp-login-app-2f5d5.firebasestorage.app",
+  messagingSenderId: "660933750433",
+  appId: "1:660933750433:web:dacff67b6c6fae6264cae0"
+};
+
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                firebaseEnabled = true;
+                document.getElementById('syncStatus').textContent = 'Connected';
+                document.getElementById('authModal').classList.add('hidden');
+                loadMatchData();
+            } catch (error) {
+                console.error('Firebase initialization error:', error);
+                skipFirebase();
+            }
+        }
+
+        function skipFirebase() {
+            firebaseEnabled = false;
+            document.getElementById('syncStatus').textContent = 'Local Storage';
+            document.getElementById('authModal').classList.add('hidden');
+            loadMatchData();
+        }
+
+        // ============ STATE MANAGEMENT ============
+        const state = {
+            team1: {
+                name: 'Team A',
+                runs: 0,
+                wickets: 0,
+                overs: 0,
+                balls: 0,
+                batters: [],
+                bowlers: []
+            },
+            team2: {
+                name: 'Team B',
+                runs: 0,
+                wickets: 0,
+                overs: 0,
+                balls: 0,
+                batters: [],
+                bowlers: []
+            },
+            currentTeam: 1,
+            ballHistory: [],
+            updates: []
+        };
+
+        // ============ LOAD/SAVE DATA ============
+        function loadMatchData() {
+            if (firebaseEnabled) {
+                db.ref('matches/' + matchId).on('value', snapshot => {
+                    if (snapshot.exists()) {
+                        Object.assign(state, snapshot.val());
+                        updateDisplay();
+                    }
+                });
+            } else {
+                const saved = localStorage.getItem('cricketMatch_' + matchId);
+                if (saved) {
+                    Object.assign(state, JSON.parse(saved));
+                    updateDisplay();
+                }
+            }
+        }
+
+        function saveMatchData() {
+            if (firebaseEnabled) {
+                db.ref('matches/' + matchId).set(state).catch(error => {
+                    console.error('Firebase save error:', error);
+                    saveToLocalStorage();
+                });
+            } else {
+                saveToLocalStorage();
+            }
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('cricketMatch_' + matchId, JSON.stringify(state));
+        }
+
+        // ============ UPDATE DISPLAY ============
+        function updateDisplay() {
+            const team = state['team' + state.currentTeam];
+            document.getElementById('runsInput').value = team.runs;
+            document.getElementById('wicketsInput').value = team.wickets;
+            document.getElementById('oversInput').value = team.overs;
+            document.getElementById('ballsInput').value = team.balls;
+
+            document.getElementById('team1Name').textContent = state.team1.name;
+            document.getElementById('team1Score').textContent = state.team1.runs;
+            document.getElementById('team1Overs').textContent = state.team1.overs.toFixed(1) + ' Overs';
+
+            document.getElementById('team2Name').textContent = state.team2.name;
+            document.getElementById('team2Score').textContent = state.team2.runs;
+            document.getElementById('team2Overs').textContent = state.team2.overs.toFixed(1) + ' Overs';
+
+            updateStats();
+            updateBallDisplay();
+            renderBatterList();
+            renderBowlerList();
+        }
+
+        // ============ QUICK ACTIONS ============
+        function addRuns(runs) {
+            const team = state['team' + state.currentTeam];
+            team.runs += runs;
+            team.balls++;
+            if (team.balls > 5) {
+                team.overs++;
+                team.balls = 0;
+            }
+            addBallRecord(runs);
+            addUpdate(`${runs} runs scored - Total: ${team.runs}/${team.wickets}`);
+            updateDisplay();
+            saveMatchData();
+        }
+
+        function addWide() {
+            const team = state['team' + state.currentTeam];
+            team.runs += 1;
+            addBallRecord('W');
+            addUpdate('Wide ball - 1 run added');
+            updateDisplay();
+            saveMatchData();
+        }
+
+        function addNoBall() {
+            const team = state['team' + state.currentTeam];
+            team.runs += 1;
+            addBallRecord('NB');
+            addUpdate('No ball - 1 run added');
+            updateDisplay();
+            saveMatchData();
+        }
+
+        function addWicket() {
+            const team = state['team' + state.currentTeam];
+            team.wickets++;
+            team.balls++;
+            if (team.balls > 5) {
+                team.overs++;
+                team.balls = 0;
+            }
+            addBallRecord('W');
+            addUpdate(`Wicket! Total: ${team.runs}/${team.wickets}`);
+            updateDisplay();
+            saveMatchData();
+        }
+
+        // ============ BALL RECORD ============
+        function addBallRecord(value) {
+            state.ballHistory.push({
+                value: value,
+                team: state.currentTeam,
+                time: new Date().toLocaleTimeString()
+            });
+        }
+
+        function updateBallDisplay() {
+            const ballList = document.getElementById('ballList');
+            ballList.innerHTML = state.ballHistory.map((ball, index) => {
+                let className = 'ball ';
+                if (ball.value === 'W') className += 'wicket';
+                else if (ball.value === 'WD') className += 'wide';
+                else if (ball.value === 'NB') className += 'no-ball';
+                else className += 'run-' + ball.value;
+                
+                return `<div class="ball ${className}" title="Ball ${index + 1}">${ball.value}</div>`;
+            }).join('');
+        }
+
+        // ============ UPDATE SCORE ============
+        function updateScore() {
+            const team = state['team' + state.currentTeam];
+            team.runs = parseInt(document.getElementById('runsInput').value);
+            team.wickets = parseInt(document.getElementById('wicketsInput').value);
+            team.overs = parseFloat(document.getElementById('oversInput').value);
+            team.balls = parseInt(document.getElementById('ballsInput').value);
+            
+            addUpdate(`Score updated: ${team.runs}/${team.wickets} (${team.overs.toFixed(1)} Overs)`);
+            updateDisplay();
+            saveMatchData();
+        }
+
+        // ============ EDIT MODAL ============
+        function openEditModal() {
+            document.getElementById('editTeam1Name').value = state.team1.name;
+            document.getElementById('editTeam1Runs').value = state.team1.runs;
+            document.getElementById('editTeam1Wickets').value = state.team1.wickets;
+            document.getElementById('editTeam1Overs').value = state.team1.overs;
+
+            document.getElementById('editTeam2Name').value = state.team2.name;
+            document.getElementById('editTeam2Runs').value = state.team2.runs;
+            document.getElementById('editTeam2Wickets').value = state.team2.wickets;
+            document.getElementById('editTeam2Overs').value = state.team2.overs;
+
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        function saveEditedMatch() {
+            state.team1.name = document.getElementById('editTeam1Name').value;
+            state.team1.runs = parseInt(document.getElementById('editTeam1Runs').value);
+            state.team1.wickets = parseInt(document.getElementById('editTeam1Wickets').value);
+            state.team1.overs = parseFloat(document.getElementById('editTeam1Overs').value);
+
+            state.team2.name = document.getElementById('editTeam2Name').value;
+            state.team2.runs = parseInt(document.getElementById('editTeam2Runs').value);
+            state.team2.wickets = parseInt(document.getElementById('editTeam2Wickets').value);
+            state.team2.overs = parseFloat(document.getElementById('editTeam2Overs').value);
+
+            addUpdate('Match details updated');
+            closeEditModal();
+            updateDisplay();
+            saveMatchData();
+        }
+
+        // ============ STATS CALCULATION ============
+        function updateStats() {
+            const team = state['team' + state.currentTeam];
+            const totalBalls = team.overs * 6 + team.balls;
+            const runRate = totalBalls > 0 ? (team.runs / totalBalls * 6).toFixed(2) : 0;
+            const avgPerBall = totalBalls > 0 ? (team.runs / totalBalls).toFixed(2) : 0;
+            const ballsLeft = 120 - totalBalls;
+            const reqRate = ballsLeft > 0 ? (team.runs / ballsLeft * 6).toFixed(2) : 0;
+
+            document.getElementById('runRate').textContent = runRate;
+            document.getElementById('avgPerBall').textContent = avgPerBall;
+            document.getElementById('ballsLeft').textContent = ballsLeft;
+            document.getElementById('reqRate').textContent = reqRate;
+        }
+
+        // ============ PLAYERS ============
+        function addBatter() {
+            const input = document.getElementById('batterInput');
+            if (input.value.trim()) {
+                state['team' + state.currentTeam].batters.push(input.value);
+                input.value = '';
+                renderBatterList();
+                addUpdate(`Batter added: ${input.value}`);
+                saveMatchData();
+            }
+        }
+
+        function addBowler() {
+            const input = document.getElementById('bowlerInput');
+            if (input.value.trim()) {
+                state['team' + state.currentTeam].bowlers.push(input.value);
+                input.value = '';
+                renderBowlerList();
+                addUpdate(`Bowler added: ${input.value}`);
+                saveMatchData();
+            }
+        }
+
+        function renderBatterList() {
+            const list = document.getElementById('batterList');
+            list.innerHTML = state['team' + state.currentTeam].batters.map((batter, index) => `
+                <div class="player-item">
+                    <span>${batter}</span>
+                    <button onclick="removeBatter(${index})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        function renderBowlerList() {
+            const list = document.getElementById('bowlerList');
+            list.innerHTML = state['team' + state.currentTeam].bowlers.map((bowler, index) => `
+                <div class="player-item">
+                    <span>${bowler}</span>
+                    <button onclick="removeBowler(${index})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        function removeBatter(index) {
+            state['team' + state.currentTeam].batters.splice(index, 1);
+            renderBatterList();
+            saveMatchData();
+        }
+
+        function removeBowler(index) {
+            state['team' + state.currentTeam].bowlers.splice(index, 1);
+            renderBowlerList();
+            saveMatchData();
+        }
+
+        // ============ LIVE UPDATES ============
+        function addUpdate(message) {
+            const time = new Date().toLocaleTimeString();
+            state.updates.unshift({ message, time });
+            if (state.updates.length > 50) state.updates.pop();
+            renderUpdates();
+            saveMatchData();
+        }
+
+        function renderUpdates() {
+            const list = document.getElementById('updatesList');
+            list.innerHTML = state.updates.map(update => `
+                <div class="update-item">
+                    ${update.message}
+                    <div class="update-time">${update.time}</div>
+                </div>
+            `).join('');
+        }
+
+        // ============ UTILITY FUNCTIONS ============
+        function undoLastBall() {
+            if (state.ballHistory.length > 0) {
+                state.ballHistory.pop();
+                addUpdate('Last ball removed');
+                updateDisplay();
+                saveMatchData();
+            }
+        }
+
+        function resetMatch() {
+            if (confirm('Are you sure you want to reset the match?')) {
+                state.team1 = { name: 'Team A', runs: 0, wickets: 0, overs: 0, balls: 0, batters: [], bowlers: [] };
+                state.team2 = { name: 'Team B', runs: 0, wickets: 0, overs: 0, balls: 0, batters: [], bowlers: [] };
+                state.ballHistory = [];
+                state.updates = [];
+                addUpdate('Match reset');
+                updateDisplay();
+                saveMatchData();
+            }
+        }
+
+        // ============ INITIALIZATION ============
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if Firebase is already initialized
+            if (!firebaseEnabled) {
+                // Show auth modal after a short delay
+                setTimeout(() => {
+                    // Auto-skip for demo purposes
+                    skipFirebase();
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1301,6 +1301,11 @@ async function addBall(ball) {
     type, runs, striker: appState.striker, dismissedId, bowler: appState.bowler, label: ballLabel, time: new Date().toISOString(),
   });
 
+  // ── celebratory effects ──
+  if (type === 'four') launchConfetti('four');
+  if (type === 'six') launchConfetti('six');
+  if (isWicket) triggerWicketEffect();
+
   const overCompleting = isLegal && s.balls > 0 && s.balls % 6 === 0;
   const maxBalls = appState.activeMatch.overs * 6;
   const inningsOverByBalls = s.balls >= maxBalls;

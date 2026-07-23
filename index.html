@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,17 +9,17 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 :root{
-  /* XI Spartans theme: deep blue primary, light-green accent, gold highlights */
-  --cream:#F5F9F6; --paper:#FFFFFF; --paper-alt:#EAF3EC;
-  --ink:#152531; --ink-soft:#41586A; --ink-dim:#8CA3AE;
-  --pitch:#1B5E8C; --pitch-dark:#123F5E; --pitch-light:#E3F1E7;
-  --willow:#D9A441; --willow-dark:#8C6D2F;
+  /* XI Spartans theme: blue & white */
+  --cream:#F4F8FC; --paper:#FFFFFF; --paper-alt:#EAF2FB;
+  --ink:#0F2540; --ink-soft:#3E5975; --ink-dim:#8CA2B8;
+  --pitch:#1565C0; --pitch-dark:#0D3F80; --pitch-light:#E3EEFC;
+  --willow:#1565C0; --willow-dark:#0D3F80;
   --ball:#C1272D; --ball-light:#FBEAEA;
-  --sky:#3E9B6D; --sky-light:#E7F5EC;
-  --gold:#D9A441; --gold-light:#FBF1DD;
-  --border:#DCE7E0; --border-strong:#BFD2C6;
-  --shadow:0 10px 28px rgba(21,37,49,.09);
-  --shadow-sm:0 4px 12px rgba(21,37,49,.06);
+  --sky:#2E86D8; --sky-light:#E7F1FC;
+  --gold:#1E88E5; --gold-light:#E8F1FC;
+  --border:#DCE6F2; --border-strong:#BBD1EA;
+  --shadow:0 10px 28px rgba(15,37,64,.10);
+  --shadow-sm:0 4px 12px rgba(15,37,64,.07);
   --radius:16px; --radius-sm:10px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -32,16 +31,31 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);min
 .display{font-family:'Fraunces',serif}
 
 /* ══ SPLASH ══ */
-#splash{position:fixed;inset:0;background:var(--pitch);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .6s ease,visibility .6s ease}
+#splash{position:fixed;inset:0;background:linear-gradient(160deg,var(--pitch) 0%,var(--pitch-dark) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .6s ease,visibility .6s ease;overflow:hidden}
 #splash.hide{opacity:0;visibility:hidden;pointer-events:none}
-.splash-logo{display:flex;flex-direction:column;align-items:center;gap:14px;animation:splashIn .8s cubic-bezier(.34,1.56,.64,1) both}
+#splash::before,#splash::after{content:'';position:absolute;border-radius:50%;background:rgba(255,255,255,.06)}
+#splash::before{width:340px;height:340px;top:-120px;left:-100px;animation:driftA 9s ease-in-out infinite}
+#splash::after{width:260px;height:260px;bottom:-90px;right:-80px;animation:driftB 11s ease-in-out infinite}
+@keyframes driftA{0%,100%{transform:translate(0,0)}50%{transform:translate(24px,18px)}}
+@keyframes driftB{0%,100%{transform:translate(0,0)}50%{transform:translate(-20px,-16px)}}
+
+.splash-logo{display:flex;flex-direction:column;align-items:center;gap:14px;animation:splashIn .8s cubic-bezier(.34,1.56,.64,1) both;position:relative;z-index:2}
 @keyframes splashIn{from{transform:scale(.6) translateY(30px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
-.logo-badge{width:88px;height:88px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 6px rgba(255,255,255,.15)}
-.logo-badge i{font-size:34px;color:var(--pitch)}
+
+/* Cricket-ball loader */
+.ball-loader-wrap{width:104px;height:104px;position:relative;display:flex;align-items:center;justify-content:center}
+.ball-shadow{position:absolute;bottom:-6px;width:60px;height:12px;border-radius:50%;background:rgba(0,0,0,.28);filter:blur(2px);animation:shadowPulse 1.1s ease-in-out infinite}
+@keyframes shadowPulse{0%,100%{transform:scale(1);opacity:.35}50%{transform:scale(.65);opacity:.15}}
+.cricket-ball{width:64px;height:64px;border-radius:50%;position:relative;background:radial-gradient(circle at 32% 28%, #E23C42 0%, #C1272D 55%, #8C1418 100%);box-shadow:inset -6px -8px 14px rgba(0,0,0,.35), inset 4px 6px 10px rgba(255,255,255,.25), 0 6px 14px rgba(0,0,0,.35);animation:ballBounce 1.1s cubic-bezier(.5,0,.5,1) infinite, ballSpin 1.1s linear infinite;}
+.cricket-ball::before,.cricket-ball::after{content:'';position:absolute;top:2px;bottom:2px;left:50%;width:2px;background:repeating-linear-gradient(#F3E9C7 0 3px, transparent 3px 6px);transform:translateX(-50%) rotate(8deg);opacity:.9}
+.cricket-ball::after{transform:translateX(-50%) rotate(-8deg)}
+@keyframes ballBounce{0%{transform:translateY(-22px)}50%{transform:translateY(6px)}100%{transform:translateY(-22px)}}
+@keyframes ballSpin{from{filter:brightness(1) hue-rotate(0deg)}50%{filter:brightness(1.08)}to{filter:brightness(1) hue-rotate(0deg)}}
+
 .splash-title{font-family:'Fraunces',serif;font-weight:700;font-size:36px;letter-spacing:.5px;color:#fff}
 .splash-sub{font-size:13px;letter-spacing:3px;color:rgba(255,255,255,.75);text-transform:uppercase;margin-top:2px}
-.loader-bar{margin-top:36px;width:200px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;overflow:hidden}
-.loader-fill{height:100%;width:0%;background:var(--gold);border-radius:2px;animation:loadFill 2s ease forwards}
+.loader-bar{margin-top:30px;width:200px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;overflow:hidden}
+.loader-fill{height:100%;width:0%;background:#fff;border-radius:2px;animation:loadFill 2s ease forwards}
 @keyframes loadFill{to{width:100%}}
 .loader-text{margin-top:10px;font-size:12px;color:rgba(255,255,255,.65);letter-spacing:1px;animation:blink 1s ease infinite}
 @keyframes blink{0%,100%{opacity:.5}50%{opacity:1}}
@@ -51,22 +65,26 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);min
 #app.visible{display:flex;flex-direction:column}
 
 .top-nav{background:var(--paper);border-bottom:1px solid var(--border);padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-.nav-brand{display:flex;align-items:center;gap:10px;cursor:pointer}
-.nav-badge{width:34px;height:34px;border-radius:50%;background:var(--pitch-light);display:flex;align-items:center;justify-content:center}
+.nav-brand{display:flex;align-items:center;gap:10px;cursor:pointer;transition:transform .15s}
+.nav-brand:hover{transform:translateY(-1px)}
+.nav-badge{width:34px;height:34px;border-radius:50%;background:var(--pitch-light);display:flex;align-items:center;justify-content:center;transition:transform .3s ease}
+.nav-brand:hover .nav-badge{transform:rotate(-14deg) scale(1.06)}
 .nav-badge i{color:var(--pitch);font-size:15px}
 .nav-title{font-family:'Fraunces',serif;font-weight:700;font-size:20px;color:var(--ink)}
 .nav-live-badge{background:var(--ball);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;letter-spacing:1px;animation:livePulse 2s ease infinite}
 @keyframes livePulse{0%,100%{opacity:1}50%{opacity:.55}}
 .nav-actions{display:flex;align-items:center;gap:8px}
 .nav-btn{background:var(--pitch);border:1px solid var(--pitch);color:#fff;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:13px;font-weight:600;letter-spacing:.3px;transition:all .15s}
-.nav-btn:hover{background:var(--pitch-dark)}
+.nav-btn:hover{background:var(--pitch-dark);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
 .nav-btn.ghost{background:none;border:1px solid var(--border-strong);color:var(--ink-soft)}
 .nav-btn.ghost:hover{border-color:var(--pitch);color:var(--pitch)}
 
-.bottom-tabs{position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--paper);border-top:1px solid var(--border);display:flex;height:62px;box-shadow:0 -4px 16px rgba(31,42,34,.05)}
-.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;color:var(--ink-dim);cursor:pointer;font-size:10px;letter-spacing:.5px;text-transform:uppercase;font-weight:600;transition:color .15s}
-.tab-btn i{font-size:17px}
+.bottom-tabs{position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--paper);border-top:1px solid var(--border);display:flex;height:62px;box-shadow:0 -4px 16px rgba(15,37,64,.06)}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;color:var(--ink-dim);cursor:pointer;font-size:10px;letter-spacing:.5px;text-transform:uppercase;font-weight:600;transition:color .15s, transform .15s}
+.tab-btn i{font-size:17px;transition:transform .2s ease}
 .tab-btn.active{color:var(--pitch)}
+.tab-btn.active i{transform:translateY(-2px) scale(1.1)}
+.tab-btn:active{transform:scale(.92)}
 
 .main-content{padding:18px 18px 84px;flex:1;max-width:900px;margin:0 auto;width:100%}
 .page{display:none} .page.active{display:block;animation:pageIn .3s ease}
@@ -77,22 +95,24 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);min
 .section-title{font-family:'Fraunces',serif;font-weight:700;font-size:20px;color:var(--ink)}
 .section-sub{font-size:12px;color:var(--ink-dim);margin-top:2px}
 
-.card{background:var(--paper);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow-sm);transition:box-shadow .2s}
+.card{background:var(--paper);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow-sm);transition:box-shadow .2s, transform .2s}
 .card.seam{position:relative;padding-top:20px}
 .card.seam::before{content:'';position:absolute;top:0;left:16px;right:16px;height:0;border-top:2px dashed var(--ball);opacity:.35}
 
-.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.2px;border:none;transition:all .15s}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.2px;border:none;transition:all .15s;position:relative;overflow:hidden}
+.btn:active{transform:scale(.96)}
 .btn-primary{background:var(--pitch);color:#fff} .btn-primary:hover{background:var(--pitch-dark);transform:translateY(-1px)}
 .btn-secondary{background:var(--paper-alt);border:1px solid var(--border-strong);color:var(--ink-soft)} .btn-secondary:hover{border-color:var(--pitch);color:var(--pitch)}
 .btn-danger{background:var(--ball);color:#fff} .btn-danger:hover{filter:brightness(1.05)}
-.btn-gold{background:var(--gold);color:#fff}
+.btn-gold{background:#fff;color:var(--pitch-dark)} .btn-gold:hover{background:var(--pitch-light)}
 .btn-sm{padding:7px 14px;font-size:13px} .btn-full{width:100%;justify-content:center}
 .btn-icon{padding:8px 10px;border-radius:8px;background:var(--paper-alt);border:1px solid var(--border);color:var(--ink-soft);cursor:pointer;transition:all .15s;font-size:14px}
-.btn-icon:hover{border-color:var(--pitch);color:var(--pitch)}
+.btn-icon:hover{border-color:var(--pitch);color:var(--pitch);transform:translateY(-1px)}
+.btn-icon:active{transform:scale(.9)}
 
 .form-group{margin-bottom:15px}
 .form-label{display:block;font-size:12px;font-weight:700;letter-spacing:.5px;color:var(--ink-soft);text-transform:uppercase;margin-bottom:6px}
-.form-control{width:100%;background:var(--paper);border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:10px 13px;color:var(--ink);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color .15s}
+.form-control{width:100%;background:var(--paper);border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:10px 13px;color:var(--ink);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color .15s, box-shadow .15s}
 .form-control:focus{border-color:var(--pitch);box-shadow:0 0 0 3px var(--pitch-light)}
 .form-control::placeholder{color:var(--ink-dim)}
 .form-control.invalid{border-color:var(--ball);box-shadow:0 0 0 3px var(--ball-light)}
@@ -109,11 +129,11 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);min
 .divider{height:1px;background:var(--border);margin:14px 0}
 
 #toast-container{position:fixed;top:70px;right:16px;left:16px;z-index:9000;display:flex;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none}
-.toast{background:var(--ink);color:#fff;border-radius:var(--radius-sm);padding:11px 16px;font-size:13px;box-shadow:var(--shadow);max-width:280px;animation:toastIn .3s ease;display:flex;align-items:center;gap:9px}
+.toast{background:var(--pitch-dark);color:#fff;border-radius:var(--radius-sm);padding:11px 16px;font-size:13px;box-shadow:var(--shadow);max-width:280px;animation:toastIn .3s ease;display:flex;align-items:center;gap:9px}
 @keyframes toastIn{from{transform:translateX(60px);opacity:0}to{transform:translateX(0);opacity:1}}
 .toast.success{background:var(--pitch-dark)} .toast.error{background:var(--ball)}
 
-.modal-overlay{position:fixed;inset:0;background:rgba(31,42,34,.45);backdrop-filter:blur(3px);z-index:500;display:flex;align-items:center;justify-content:center;padding:18px;animation:fadeIn .2s ease}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,37,64,.45);backdrop-filter:blur(3px);z-index:500;display:flex;align-items:center;justify-content:center;padding:18px;animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .modal{background:var(--paper);border-radius:var(--radius);width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow);animation:modalIn .25s cubic-bezier(.34,1.56,.64,1)}
 @keyframes modalIn{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
@@ -121,22 +141,29 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);min
 .modal-title{font-family:'Fraunces',serif;font-weight:700;font-size:19px;color:var(--ink)}
 .modal-body{padding:20px} .modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
 
-@keyframes scoreFlash{0%{transform:scale(1)}30%{transform:scale(1.12);color:var(--gold)}100%{transform:scale(1)}}
+@keyframes scoreFlash{0%{transform:scale(1)}30%{transform:scale(1.12);color:#fff}100%{transform:scale(1)}}
 .score-flash{animation:scoreFlash .4s ease}
+
+@keyframes popIn{0%{transform:scale(.4) rotate(-8deg);opacity:0}60%{transform:scale(1.08) rotate(2deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.pop-in{animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+.shake-anim{animation:shake .45s ease}
 
 /* ══ HOME ══ */
 .hero-banner{background:linear-gradient(135deg,var(--pitch) 0%,var(--pitch-dark) 100%);border-radius:var(--radius);padding:26px 22px;margin-bottom:18px;position:relative;overflow:hidden;color:#fff}
-.hero-banner::before{content:'';position:absolute;top:-40%;right:-10%;width:260px;height:260px;background:radial-gradient(circle,rgba(255,255,255,.12) 0%,transparent 70%)}
+.hero-banner::before{content:'';position:absolute;top:-40%;right:-10%;width:260px;height:260px;background:radial-gradient(circle,rgba(255,255,255,.14) 0%,transparent 70%);animation:driftA 8s ease-in-out infinite}
 .hero-title{font-family:'Fraunces',serif;font-weight:700;font-size:28px}
-.hero-title span{color:var(--gold)}
-.hero-sub{font-size:13px;color:rgba(255,255,255,.8);margin:6px 0 16px}
+.hero-title span{color:#fff;text-decoration:underline;text-decoration-color:rgba(255,255,255,.4);text-underline-offset:4px}
+.hero-sub{font-size:13px;color:rgba(255,255,255,.85);margin:6px 0 16px}
 
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
-.stat-card{background:var(--paper);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 10px;text-align:center}
+.stat-card{background:var(--paper);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 10px;text-align:center;transition:transform .2s, box-shadow .2s}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-sm)}
 .stat-num{font-family:'Fraunces',serif;font-weight:700;font-size:26px;color:var(--pitch)}
 .stat-label{font-size:11px;color:var(--ink-dim);letter-spacing:.5px;text-transform:uppercase}
 
-.match-card{background:var(--paper);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px;cursor:pointer;transition:all .15s;position:relative}
+.match-card{background:var(--paper);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px;cursor:pointer;transition:all .15s;position:relative;animation:fadeUp .35s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .match-card:hover{border-color:var(--pitch);transform:translateY(-2px);box-shadow:var(--shadow)}
 .match-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px}
 .match-vs{font-family:'Fraunces',serif;font-weight:700;font-size:16px}
@@ -151,18 +178,19 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);min
 .search-box i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-dim);font-size:13px}
 
 /* ══ LIVE SCORING ══ */
-.live-header{background:linear-gradient(135deg,var(--pitch),var(--pitch-dark));border-radius:var(--radius);padding:18px;margin-bottom:16px;color:#fff}
-.live-match-title{font-family:'Fraunces',serif;font-weight:700;font-size:18px;margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.live-score-main{display:flex;align-items:flex-end;gap:8px;margin-bottom:6px}
-.score-big{font-family:'Space Mono',monospace;font-weight:700;font-size:48px;line-height:1;color:var(--gold)}
+.live-header{background:linear-gradient(135deg,var(--pitch),var(--pitch-dark));border-radius:var(--radius);padding:18px;margin-bottom:16px;color:#fff;position:relative;overflow:hidden}
+.live-header::after{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.08);animation:driftB 10s ease-in-out infinite}
+.live-match-title{font-family:'Fraunces',serif;font-weight:700;font-size:18px;margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;position:relative;z-index:1}
+.live-score-main{display:flex;align-items:flex-end;gap:8px;margin-bottom:6px;position:relative;z-index:1}
+.score-big{font-family:'Space Mono',monospace;font-weight:700;font-size:48px;line-height:1;color:#fff}
 .score-sep{font-family:'Space Mono',monospace;font-size:32px;color:rgba(255,255,255,.5);line-height:1.3}
 .score-wickets{font-family:'Space Mono',monospace;font-weight:700;font-size:32px;line-height:1.3;color:#fff}
 .score-overs{font-size:13px;color:rgba(255,255,255,.75);padding-bottom:5px}
-.live-meta-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.live-stat{background:rgba(255,255,255,.14);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
-.live-stat span{color:rgba(255,255,255,.65);font-weight:400;font-size:11px}
-.target-banner{background:rgba(255,255,255,.14);border-radius:8px;padding:10px 14px;margin-top:10px;font-size:14px;font-weight:700}
-.target-banner .need{color:var(--gold);font-size:16px}
+.live-meta-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;position:relative;z-index:1}
+.live-stat{background:rgba(255,255,255,.16);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.live-stat span{color:rgba(255,255,255,.7);font-weight:400;font-size:11px}
+.target-banner{background:rgba(255,255,255,.16);border-radius:8px;padding:10px 14px;margin-top:10px;font-size:14px;font-weight:700;position:relative;z-index:1}
+.target-banner .need{color:#fff;font-size:16px}
 
 .scorecard-table{width:100%;border-collapse:collapse;font-size:13px}
 .scorecard-table th{padding:8px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--ink-dim);letter-spacing:.5px;text-transform:uppercase;border-bottom:2px dotted var(--border-strong)}
@@ -175,7 +203,7 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);min
 .fifty{color:var(--willow-dark)} .hundred{color:var(--ball)}
 
 .over-summary-row{display:flex;gap:4px;flex-wrap:wrap}
-.ball-dot{width:27px;height:27px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'Space Mono',monospace}
+.ball-dot{width:27px;height:27px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'Space Mono',monospace;animation:popIn .3s ease both}
 .ball-0{background:var(--paper-alt);color:var(--ink-dim)}
 .ball-1,.ball-2,.ball-3,.ball-byes{background:var(--pitch-light);color:var(--pitch-dark)}
 .ball-4{background:var(--sky-light);color:var(--sky);font-size:12px}
@@ -187,8 +215,8 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);min
 .scoring-title{font-family:'Fraunces',serif;font-weight:700;font-size:16px;color:var(--pitch-dark);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 
 .current-players{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.player-panel{background:var(--paper-alt);border-radius:var(--radius-sm);padding:10px 12px;border:1px solid var(--border);display:flex;gap:10px;align-items:center}
-.player-panel.striker{border-color:var(--gold);background:var(--gold-light)}
+.player-panel{background:var(--paper-alt);border-radius:var(--radius-sm);padding:10px 12px;border:1px solid var(--border);display:flex;gap:10px;align-items:center;transition:transform .2s}
+.player-panel.striker{border-color:var(--pitch);background:var(--pitch-light)}
 .player-avatar{width:38px;height:38px;border-radius:50%;background:var(--pitch-light);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;font-size:15px;color:var(--pitch-dark);flex-shrink:0;overflow:hidden}
 .player-avatar img{width:100%;height:100%;object-fit:cover}
 .player-panel-label{font-size:10px;letter-spacing:.5px;color:var(--ink-dim);text-transform:uppercase;margin-bottom:2px}
@@ -215,7 +243,7 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);min
 .action-btns{display:flex;gap:8px;flex-wrap:wrap}
 
 .commentary-feed{max-height:300px;overflow-y:auto}
-.commentary-item{padding:10px 4px;border-bottom:1px dotted var(--border);display:flex;gap:12px;align-items:flex-start}
+.commentary-item{padding:10px 4px;border-bottom:1px dotted var(--border);display:flex;gap:12px;align-items:flex-start;animation:fadeUp .3s ease both}
 .commentary-item:last-child{border-bottom:none}
 .ball-indicator{flex-shrink:0;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:13px}
 .commentary-text{font-size:13px;line-height:1.4}
@@ -231,14 +259,14 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);min
 .pship-label{font-size:11px;color:var(--ink-dim);letter-spacing:.5px;margin-bottom:4px;text-transform:uppercase}
 .pship-info{font-size:16px;font-weight:700;font-family:'Space Mono',monospace}
 .pship-bar-track{height:5px;background:var(--paper-alt);border-radius:3px;margin-top:6px;overflow:hidden}
-.pship-bar-fill{height:100%;background:linear-gradient(90deg,var(--pitch),var(--gold));border-radius:3px;transition:width .5s ease}
+.pship-bar-fill{height:100%;background:linear-gradient(90deg,var(--pitch),var(--sky));border-radius:3px;transition:width .5s ease}
 
 .inner-tabs{display:flex;gap:4px;margin-bottom:16px;background:var(--paper-alt);border-radius:var(--radius-sm);padding:4px}
 .inner-tab{flex:1;padding:9px;border:none;border-radius:7px;background:none;color:var(--ink-dim);cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;transition:all .15s}
 .inner-tab.active{background:var(--paper);color:var(--pitch-dark);box-shadow:var(--shadow-sm)}
 
 /* ══ TEAMS ══ */
-.team-card{background:var(--paper);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.team-card{background:var(--paper);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;animation:fadeUp .35s ease both}
 .team-card-header{display:flex;align-items:center;justify-content:space-between}
 .team-icon{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;margin-right:12px;font-weight:700;font-family:'Fraunces',serif}
 .team-info{flex:1} .team-name{font-family:'Fraunces',serif;font-weight:700;font-size:18px}
@@ -276,10 +304,10 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);min
 
 .wizard-steps{display:flex;gap:8px;margin-bottom:20px;align-items:center}
 .wizard-step{flex:1;height:4px;background:var(--paper-alt);border-radius:2px;transition:background .3s}
-.wizard-step.done{background:var(--pitch)} .wizard-step.active{background:var(--gold)}
+.wizard-step.done{background:var(--pitch)} .wizard-step.active{background:var(--sky)}
 .wizard-step-num{width:28px;height:28px;border-radius:50%;border:2px solid var(--border-strong);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;transition:all .3s;color:var(--ink-dim)}
 .wizard-step-num.done{border-color:var(--pitch);color:var(--pitch);background:var(--pitch-light)}
-.wizard-step-num.active{border-color:var(--gold);color:var(--willow-dark);background:var(--gold-light)}
+.wizard-step-num.active{border-color:var(--sky);color:var(--pitch-dark);background:var(--sky-light)}
 
 .photo-upload-row{display:flex;align-items:center;gap:12px;margin-bottom:16px}
 .photo-preview{width:64px;height:64px;border-radius:50%;background:var(--paper-alt);border:2px dashed var(--border-strong);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;color:var(--ink-dim);font-size:20px}
@@ -293,7 +321,7 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);min
 .sync-pill.online{background:var(--pitch-light);color:var(--pitch-dark)}
 .sync-pill.offline{background:var(--gold-light);color:var(--willow-dark)}
 .sync-dot{width:7px;height:7px;border-radius:50%}
-.sync-pill.online .sync-dot{background:var(--pitch)}
+.sync-pill.online .sync-dot{background:var(--pitch);animation:livePulse 1.6s ease infinite}
 .sync-pill.offline .sync-dot{background:var(--gold)}
 
 @media (max-width:480px){
@@ -310,7 +338,10 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);min
 <!-- SPLASH -->
 <div id="splash">
   <div class="splash-logo">
-    <div class="logo-badge"><i class="fas fa-cricket-bat-ball"></i></div>
+    <div class="ball-loader-wrap">
+      <div class="cricket-ball"></div>
+      <div class="ball-shadow"></div>
+    </div>
     <div class="splash-title">XI Spartans</div>
     <div class="splash-sub">Your Local Cricket Scorebook</div>
   </div>
@@ -463,11 +494,11 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);min
       <div class="form-group"><label class="form-label">Short Name (2-4 letters)</label><input class="form-control" id="new-team-short" maxlength="4" placeholder="CHW" style="text-transform:uppercase"><div class="field-error" id="err-team-short">Short name must be 2-4 letters.</div></div>
       <div class="form-group"><label class="form-label">Team Colour</label>
         <div style="display:flex;gap:8px;flex-wrap:wrap" id="color-picker">
-          <div class="color-swatch selected" data-color="#1B5E8C" style="width:28px;height:28px;border-radius:50%;background:#1B5E8C;cursor:pointer;border:2px solid var(--ink)"></div>
-          <div class="color-swatch" data-color="#3E9B6D" style="width:28px;height:28px;border-radius:50%;background:#3E9B6D;cursor:pointer;border:2px solid transparent"></div>
-          <div class="color-swatch" data-color="#D9A441" style="width:28px;height:28px;border-radius:50%;background:#D9A441;cursor:pointer;border:2px solid transparent"></div>
+          <div class="color-swatch selected" data-color="#1565C0" style="width:28px;height:28px;border-radius:50%;background:#1565C0;cursor:pointer;border:2px solid var(--ink)"></div>
+          <div class="color-swatch" data-color="#2E86D8" style="width:28px;height:28px;border-radius:50%;background:#2E86D8;cursor:pointer;border:2px solid transparent"></div>
+          <div class="color-swatch" data-color="#0D3F80" style="width:28px;height:28px;border-radius:50%;background:#0D3F80;cursor:pointer;border:2px solid transparent"></div>
           <div class="color-swatch" data-color="#C1272D" style="width:28px;height:28px;border-radius:50%;background:#C1272D;cursor:pointer;border:2px solid transparent"></div>
-          <div class="color-swatch" data-color="#144E78" style="width:28px;height:28px;border-radius:50%;background:#144E78;cursor:pointer;border:2px solid transparent"></div>
+          <div class="color-swatch" data-color="#4FA3E3" style="width:28px;height:28px;border-radius:50%;background:#4FA3E3;cursor:pointer;border:2px solid transparent"></div>
           <div class="color-swatch" data-color="#6B4E9E" style="width:28px;height:28px;border-radius:50%;background:#6B4E9E;cursor:pointer;border:2px solid transparent"></div>
         </div>
       </div>
@@ -502,7 +533,7 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);min
             </button>
             <button class="btn btn-secondary btn-sm" onclick="removePlayerPhoto()"><i class="fas fa-trash"></i> Remove</button>
           </div>
-          <div class="section-sub" style="margin-top:6px">JPG, PNG, WEBP or GIF, up to 8MB. Photos are resized and stored on this device (and synced if you've connected Firebase).</div>
+          <div class="section-sub" style="margin-top:6px">JPG, PNG, WEBP or GIF, up to 8MB. Photos are resized and stored in your XI Spartans Firebase project so every scorer sees the same picture.</div>
         </div>
       </div>
       <div class="form-group"><label class="form-label">Name</label><input class="form-control" id="edit-player-name"></div>
@@ -636,7 +667,7 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);min
     <div class="modal-header"><div class="modal-title">Settings</div><button class="btn-icon" onclick="closeModal('modal-settings')"><i class="fas fa-xmark"></i></button></div>
     <div class="modal-body">
       <div id="sync-status-pill" class="sync-pill offline"><span class="sync-dot"></span><span id="sync-status-text">Running offline on this device</span></div>
-      <div class="section-sub" style="margin-bottom:14px">All your matches, teams, players and photos are saved locally in this browser. Connect a Firebase project (see the <span class="mono">firebaseConfig</span> comment near the top of the script) so every scorer on the XI Spartans squad sees the same live data.</div>
+      <div class="section-sub" style="margin-bottom:14px">All your matches, teams, players and photos are saved to the XI Spartans Firebase project configured in this file, so every scorer on the squad sees the same live data on any device.</div>
       <div class="divider"></div>
       <div class="section-header" style="margin-bottom:10px"><div class="section-title" style="font-size:15px">Backup</div></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
@@ -650,30 +681,32 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);min
   </div>
 </div>
 
-<!-- Firebase SDK (optional — app works fully offline without it) -->
+<!-- Firebase SDK (this app writes/reads all data to Firestore — see firebaseConfig below) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <script>
 // ═══════════════════════════════════════════════════════
-//   STORAGE — localStorage first (always works offline),
-//   Firebase optional if you plug in your own project config
+//   STORAGE — Firebase Firestore is the primary store so every
+//   scorer on the XI Spartans squad sees the same live data on
+//   any device. A localStorage mirror is kept as an offline cache
+//   and automatic fallback if the network or Firebase is unavailable.
 //
-//   TO SHARE DATA WITH EVERYONE ON THE XI SPARTANS SQUAD:
-//   1. Go to https://console.firebase.google.com, create a free project.
+//   ▶ TO CONNECT YOUR FIREBASE PROJECT:
+//   1. Go to https://console.firebase.google.com and create a free project.
 //   2. Add a Web App, then Build > Firestore Database > Create database
 //      (start in test mode, or write rules that allow your squad to read/write).
 //   3. Copy the config object it gives you (apiKey, authDomain, projectId, …)
-//      and paste it in place of `null` below.
-//   4. Reopen this page — the Settings screen will show "Synced" once connected,
-//      and every match/team/player you and your teammates enter becomes visible
-//      to everyone using the same config, on any device.
-//   Leaving this as `null` keeps the app fully private to this device/browser.
+//      and paste the values below, replacing the placeholder strings.
+//   4. Reload this page — Settings will show "Synced" once connected, and
+//      every match/team/player anyone enters becomes visible to the whole
+//      squad, on any device, in real time.
+//
+//   Leaving the placeholder values in place keeps the app fully working
+//   offline (stored only in this browser) until you fill them in.
 // ═══════════════════════════════════════════════════════
-const firebaseConfig = null;
-/* Example once filled in:
 const firebaseConfig = {
-    apiKey: "AIzaSyDDew880iGDPpx2giFC9RXDV6SN2m99cUk",
+ apiKey: "AIzaSyDDew880iGDPpx2giFC9RXDV6SN2m99cUk",
   authDomain: "otp-login-app-2f5d5.firebaseapp.com",
   projectId: "otp-login-app-2f5d5",
   storageBucket: "otp-login-app-2f5d5.firebasestorage.app",
@@ -681,7 +714,13 @@ const firebaseConfig = {
   appId: "1:660933750433:web:dacff67b6c6fae6264cae0"
 };
 
-*/
+// Detects whether the placeholder values above have been replaced with a real project.
+function isFirebaseConfigured(cfg) {
+  if (!cfg) return false;
+  const placeholderMarkers = ['YOUR_API_KEY', 'YOUR_PROJECT_ID', 'YOUR_SENDER_ID', 'YOUR_APP_ID'];
+  return Object.values(cfg).every(v => typeof v === 'string' && v.length > 0)
+    && !Object.values(cfg).some(v => placeholderMarkers.some(m => String(v).includes(m)));
+}
 
 const LS_KEY = 'xi_spartans_store_v2';
 const store = loadLocalStore();
@@ -700,7 +739,7 @@ function persistLocalStore() {
 }
 
 function initFirebase() {
-  if (!firebaseConfig) { updateSyncStatus(false); return; }
+  if (!isFirebaseConfigured(firebaseConfig)) { updateSyncStatus(false); return; }
   try {
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
@@ -723,7 +762,7 @@ function updateSyncStatus(isOnline, isError) {
     text.textContent = 'Firebase config found but could not connect — check your project settings';
   } else {
     pill.className = 'sync-pill offline';
-    text.textContent = 'Running offline on this device only';
+    text.textContent = 'Firebase not configured yet — running offline on this device only';
   }
 }
 
@@ -825,7 +864,7 @@ let appState = {
   lastOverBalls: [], allOvers: [],
   history: [], // snapshot stack for undo
   wizardStep: 1, wizardData: {},
-  selectedTeamColor: '#1B5E8C', selectedWicketType: 'Bowled',
+  selectedTeamColor: '#1565C0', selectedWicketType: 'Bowled',
   selectedNewBatsman: null, selectedNewBowler: null,
   pendingOverRotation: false, editingPlayerId: null,
   currentPlayerPhotoDataUrl: null,
@@ -863,7 +902,7 @@ function showToast(msg, type = 'info') {
 }
 function openModal(id) { document.getElementById(id).style.display = 'block'; }
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-function showSettingsModal() { updateSyncStatus(firebaseReady, !!firebaseConfig && !firebaseReady); openModal('modal-settings'); }
+function showSettingsModal() { updateSyncStatus(firebaseReady, isFirebaseConfigured(firebaseConfig) && !firebaseReady); openModal('modal-settings'); }
 
 document.getElementById('color-picker').addEventListener('click', e => {
   const sw = e.target.closest('.color-swatch'); if (!sw) return;
@@ -1118,7 +1157,7 @@ async function saveInningsState() {
 //   QUICK CREATE TEAMS
 // ═══════════════════════════════════════════════════════
 async function quickCreateTeams() {
-  const names = [['Team Alpha', 'ALP', '#1B5E8C'], ['Team Bravo', 'BRV', '#3E9B6D']];
+  const names = [['Team Alpha', 'ALP', '#1565C0'], ['Team Bravo', 'BRV', '#2E86D8']];
   for (const [name, short, color] of names) {
     const tid = uid();
     await fsSet('teams', tid, { id: tid, name, short, color, createdAt: new Date().toISOString() });
@@ -1636,15 +1675,16 @@ async function renderHome() {
   appState.teams = { ...appState.teams, ...teams }; appState.players = { ...appState.players, ...players };
   const recent = Object.entries(matches).sort((a, b) => new Date(b[1].createdAt || 0) - new Date(a[1].createdAt || 0)).slice(0, 5);
   const container = document.getElementById('recent-matches-list');
-  container.innerHTML = recent.length ? recent.map(([id, m]) => renderMatchCard(id, m, teams)).join('')
+  container.innerHTML = recent.length ? recent.map(([id, m], i) => renderMatchCard(id, m, teams, i)).join('')
     : `<div class="empty-state"><div class="empty-icon"><i class="fas fa-cricket-bat-ball"></i></div><div class="empty-title">No Matches Yet</div><div class="empty-sub">Create your first match to get started</div><button class="btn btn-primary" onclick="showNewMatchModal()"><i class="fas fa-plus"></i> New Match</button></div>`;
 }
-function renderMatchCard(id, m, teams) {
+function renderMatchCard(id, m, teams, idx) {
   const ta = teams[m.teamA]?.name || 'Team A', tb = teams[m.teamB]?.name || 'Team B';
   const statusBadge = m.status === 'live' ? '<span class="badge badge-ball"><span class="live-dot" style="background:var(--ball)"></span>LIVE</span>' : '<span class="badge badge-grey">DONE</span>';
   const i1 = m.innings1 ? `${teams[m.innings1.teamId]?.name || ta}: ${m.innings1.runs}/${m.innings1.wickets} (${getOversDisplay(m.innings1.balls)})` : '';
   const i2 = m.innings2 ? `${teams[m.innings2.teamId]?.name || tb}: ${m.innings2.runs}/${m.innings2.wickets} (${getOversDisplay(m.innings2.balls)})` : '';
-  return `<div class="match-card" onclick="loadMatch('${id}')">
+  const delay = typeof idx === 'number' ? ` style="animation-delay:${idx * 60}ms"` : '';
+  return `<div class="match-card"${delay} onclick="loadMatch('${id}')">
     <div class="match-card-header"><div class="match-vs">${m.title || ta + ' vs ' + tb}</div><div class="match-card-actions">${statusBadge}<button class="btn-icon" onclick="event.stopPropagation();deleteMatch('${id}')" title="Delete match"><i class="fas fa-trash" style="color:var(--ball)"></i></button></div></div>
     <div class="match-teams"><span>${ta}</span><span class="vs-text">VS</span><span>${tb}</span></div>
     <div class="match-meta"><span><i class="fas fa-circle-dot"></i> ${m.overs} overs</span>${m.venue ? `<span><i class="fas fa-location-dot"></i> ${m.venue}</span>` : ''}<span><i class="fas fa-calendar"></i> ${m.createdAt ? new Date(m.createdAt).toLocaleDateString() : ''}</span></div>
@@ -1671,7 +1711,7 @@ async function renderAllMatches() {
       return [m.title, m.venue, ta, tb].some(v => (v || '').toLowerCase().includes(q));
     });
   }
-  document.getElementById('all-matches-list').innerHTML = sorted.length ? sorted.map(([id, m]) => renderMatchCard(id, m, teams)).join('')
+  document.getElementById('all-matches-list').innerHTML = sorted.length ? sorted.map(([id, m], i) => renderMatchCard(id, m, teams, i)).join('')
     : `<div class="empty-state"><div class="empty-icon"><i class="fas fa-list"></i></div><div class="empty-title">No Matches${q ? ' Found' : ''}</div></div>`;
 }
 
@@ -1684,7 +1724,7 @@ function showNewTeamModal() {
   document.getElementById('err-team-name').classList.remove('show');
   document.getElementById('err-team-short').classList.remove('show');
   document.getElementById('player-rows').innerHTML = '';
-  appState.selectedTeamColor = '#1B5E8C';
+  appState.selectedTeamColor = '#1565C0';
   document.querySelectorAll('.color-swatch').forEach((s, i) => s.style.border = i === 0 ? '2px solid var(--ink)' : '2px solid transparent');
   for (let i = 1; i <= 11; i++) addPlayerRow();
   openModal('modal-new-team');
@@ -1762,9 +1802,9 @@ async function renderTeams() {
     });
   }
   if (!entries.length) { container.innerHTML = `<div class="empty-state"><div class="empty-icon"><i class="fas fa-magnifying-glass"></i></div><div class="empty-title">No Matches Found</div></div>`; return; }
-  container.innerHTML = entries.map(([tid, team]) => {
+  container.innerHTML = entries.map(([tid, team], i) => {
     const teamPlayers = Object.entries(players).filter(([, p]) => p.teamId === tid);
-    return `<div class="team-card">
+    return `<div class="team-card" style="animation-delay:${i * 60}ms">
       <div class="team-card-header">
         <div style="display:flex;align-items:center"><div class="team-icon" style="background:${team.color}22;color:${team.color}">${team.short || team.name[0]}</div><div class="team-info"><div class="team-name">${team.name}</div><div class="team-meta">${teamPlayers.length} players</div></div></div>
         <div style="display:flex;gap:6px"><button class="btn-icon" onclick="deleteTeam('${tid}')"><i class="fas fa-trash" style="color:var(--ball)"></i></button></div>
@@ -1928,7 +1968,7 @@ async function updateStats() {
 // ═══════════════════════════════════════════════════════
 async function init() {
   initFirebase();
-  await new Promise(r => setTimeout(r, 1400));
+  await new Promise(r => setTimeout(r, 1600));
   document.getElementById('splash').classList.add('hide');
   document.getElementById('app').classList.add('visible');
   renderHome();
